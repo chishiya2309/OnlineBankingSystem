@@ -1,0 +1,17 @@
+node_modules/
+artifacts/
+cache/
+coverage/
+types/
+typechain-types/
+dist/
+ignition/deployments/
+.npm-cache/
+
+.env
+.env.*
+!.env.example
+*.log
+
+~$*
+/document/Document.docx
