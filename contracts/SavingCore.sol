@@ -3,14 +3,29 @@ pragma solidity ^0.8.34;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IVaultManager} from "./interfaces/IVaultManager.sol";
 
 /// @title SavingCore
 /// @notice Core term deposit engine holding principal, managing plans, and issuing deposit NFTs.
-/// @dev In Task D2-01, foundation and Saving Plan Management are implemented.
-/// Full deposit workflows and financial helpers will be implemented in D2-02 and Day 3.
+/// @dev Supports the standard MockUSDC asset; fee-on-transfer and rebasing assets are unsupported.
+/// Withdrawal and renewal workflows are implemented in subsequent tasks.
 contract SavingCore is ERC721, ReentrancyGuard {
+    using SafeERC20 for IERC20;
+
+    uint256 internal constant BPS_DENOMINATOR = 10000;
+    uint256 internal constant SECONDS_PER_DAY = 1 days;
+    uint256 internal constant SECONDS_PER_YEAR = 365 days;
+
+    enum DepositStatus {
+        Active,
+        Withdrawn,
+        ManualRenewed,
+        AutoRenewed
+    }
+
     /// @notice Term deposit plan specification.
     struct SavingPlan {
         uint32 tenorDays;
@@ -19,6 +34,17 @@ contract SavingCore is ERC721, ReentrancyGuard {
         uint256 maxDeposit;
         uint16 earlyWithdrawPenaltyBps;
         bool enabled;
+    }
+
+    /// @notice Immutable terms of a deposit; current ownership is tracked solely by ERC721.
+    struct Deposit {
+        uint256 planId;
+        uint256 principal;
+        uint256 startAt;
+        uint256 maturityAt;
+        uint16 aprBpsAtOpen;
+        uint16 penaltyBpsAtOpen;
+        DepositStatus status;
     }
 
     /// @notice Vault holding the interest reserve; sole authority for Bank Admin.
@@ -33,8 +59,15 @@ contract SavingCore is ERC721, ReentrancyGuard {
     /// @notice Total number of saving plans created.
     uint256 public planCount;
 
+    /// @notice Number of successfully created deposits; IDs start at one and are never reused.
+    uint256 public depositCount;
+
+    /// @notice Sum of principal belonging to all Active deposits, excluding token donations.
+    uint256 public totalPrincipal;
+
     /// @dev Internal mapping from plan ID to SavingPlan struct.
     mapping(uint256 => SavingPlan) private _plans;
+    mapping(uint256 => Deposit) private _deposits;
 
     // --- Custom Errors ---
     error ZeroAddress();
@@ -46,11 +79,36 @@ contract SavingCore is ERC721, ReentrancyGuard {
     error InvalidPenalty(uint256 penaltyBps);
     error InvalidDepositLimits(uint256 minDeposit, uint256 maxDeposit);
     error PlanNotFound(uint256 planId);
+    error CoreNotBound(address expectedCore, address actualCore);
+    error EnforcedPause();
+    error PlanDisabled(uint256 planId);
+    error AmountZero();
+    error DepositAmountOutOfRange(uint256 amount, uint256 minDeposit, uint256 maxDeposit);
+    error DepositNotFound(uint256 depositId);
+    error DepositNotActive(uint256 depositId, DepositStatus currentStatus);
+    error NotDepositOwner(uint256 depositId, address caller);
+    error DepositNotMatured(uint256 depositId, uint256 maturityAt);
+    error EarlyWithdrawalClosed(uint256 depositId, uint256 maturityAt);
 
     // --- Events ---
     event PlanCreated(uint256 indexed planId, uint256 tenorDays, uint256 aprBps);
     event PlanUpdated(uint256 indexed planId, uint256 newAprBps);
     event PlanEnabledChanged(uint256 indexed planId, bool enabled);
+    event DepositOpened(
+        uint256 indexed depositId,
+        address indexed owner,
+        uint256 indexed planId,
+        uint256 principal,
+        uint256 maturityAt,
+        uint256 aprBpsAtOpen
+    );
+    event Withdrawn(
+        uint256 indexed depositId,
+        address indexed owner,
+        uint256 principal,
+        uint256 interest,
+        bool isEarly
+    );
 
     /// @notice Initializes the SavingCore contract.
     /// @param vaultManager_ Address of the deployed VaultManager contract.
@@ -153,5 +211,183 @@ contract SavingCore is ERC721, ReentrancyGuard {
         if (planId == 0 || planId > planCount) revert PlanNotFound(planId);
         _plans[planId].enabled = false;
         emit PlanEnabledChanged(planId, false);
+    }
+
+    /// @notice Opens a term deposit funded by the caller and mints its transferable certificate.
+    /// @dev Effects precede interactions; transfer or receiver failure reverts the entire operation.
+    /// Principal must reach Core before the ERC721 receiver callback can run.
+    /// @param planId Existing enabled plan whose terms are captured at opening.
+    /// @param amount Positive principal in smallest token units, within the plan's limits.
+    /// @return depositId ID shared by the deposit record and its ERC721 certificate.
+    function openDeposit(uint256 planId, uint256 amount) external nonReentrant returns (uint256 depositId) {
+        address actualCore = vaultManager.savingCore();
+        if (actualCore != address(this)) revert CoreNotBound(address(this), actualCore);
+        if (vaultManager.paused()) revert EnforcedPause();
+        if (planId == 0 || planId > planCount) revert PlanNotFound(planId);
+
+        SavingPlan memory plan = _plans[planId];
+        if (!plan.enabled) revert PlanDisabled(planId);
+        if (amount == 0) revert AmountZero();
+        if ((plan.minDeposit != 0 && amount < plan.minDeposit)
+            || (plan.maxDeposit != 0 && amount > plan.maxDeposit)) {
+            revert DepositAmountOutOfRange(amount, plan.minDeposit, plan.maxDeposit);
+        }
+
+        uint256 startAt = block.timestamp;
+        uint256 tenorSeconds = uint256(plan.tenorDays) * SECONDS_PER_DAY;
+        uint256 maturityAt = startAt + tenorSeconds;
+        // Reject terms whose eventual full-term interest or payout cannot fit in uint256.
+        _fullTermPayout(amount, plan.aprBps, tenorSeconds);
+
+        depositId = ++depositCount;
+        _deposits[depositId] = Deposit({
+            planId: planId,
+            principal: amount,
+            startAt: startAt,
+            maturityAt: maturityAt,
+            aprBpsAtOpen: plan.aprBps,
+            penaltyBpsAtOpen: plan.earlyWithdrawPenaltyBps,
+            status: DepositStatus.Active
+        });
+        totalPrincipal += amount;
+
+        token.safeTransferFrom(msg.sender, address(this), amount);
+        _safeMint(msg.sender, depositId);
+
+        // A receiver may forward the NFT during safeMint; this is the initial recipient.
+        emit DepositOpened(depositId, msg.sender, planId, amount, maturityAt, plan.aprBps);
+    }
+
+    /// @notice Returns the terms and status of an existing deposit, including while paused.
+    function getDeposit(uint256 depositId) external view returns (Deposit memory) {
+        if (depositId == 0 || depositId > depositCount) revert DepositNotFound(depositId);
+        return _deposits[depositId];
+    }
+
+    /// @notice Calculates the full-term contractual interest for a deposit based on its open snapshot.
+    /// @param depositId ID of the deposit (1 <= depositId <= depositCount).
+    /// @return Contractual interest in smallest token units.
+    function calculateInterest(uint256 depositId) external view returns (uint256) {
+        if (depositId == 0 || depositId > depositCount) revert DepositNotFound(depositId);
+        return _calculateInterest(_deposits[depositId]);
+    }
+
+    /// @notice Calculates the early withdrawal penalty for a deposit based on its open snapshot.
+    /// @param depositId ID of the deposit (1 <= depositId <= depositCount).
+    /// @return Penalty amount in smallest token units.
+    function calculatePenalty(uint256 depositId) external view returns (uint256) {
+        if (depositId == 0 || depositId > depositCount) revert DepositNotFound(depositId);
+        return _calculatePenalty(_deposits[depositId]);
+    }
+
+    /// @notice Withdraws principal and full-term interest at or after maturity.
+    /// @dev Only the current certificate owner may withdraw. Principal is paid from Core;
+    /// interest is pulled from VaultManager.
+    /// @param depositId ID of the active deposit to settle.
+    function withdrawAtMaturity(uint256 depositId) external nonReentrant {
+        address actualCore = vaultManager.savingCore();
+        if (actualCore != address(this)) revert CoreNotBound(address(this), actualCore);
+        if (vaultManager.paused()) revert EnforcedPause();
+        if (depositId == 0 || depositId > depositCount) revert DepositNotFound(depositId);
+
+        Deposit storage deposit = _deposits[depositId];
+        if (deposit.status != DepositStatus.Active) {
+            revert DepositNotActive(depositId, deposit.status);
+        }
+        if (ownerOf(depositId) != msg.sender) {
+            revert NotDepositOwner(depositId, msg.sender);
+        }
+        if (block.timestamp < deposit.maturityAt) {
+            revert DepositNotMatured(depositId, deposit.maturityAt);
+        }
+
+        uint256 principal = deposit.principal;
+        uint256 interest = _calculateInterest(deposit);
+
+        // Checks-Effects-Interactions: record terminal status and decrement liability before transfers
+        deposit.status = DepositStatus.Withdrawn;
+        totalPrincipal -= principal;
+
+        // Pull interest from VaultManager if positive
+        if (interest > 0) {
+            vaultManager.payInterest(interest);
+        }
+
+        // Payout principal + interest to the current NFT owner
+        token.safeTransfer(msg.sender, principal + interest);
+
+        emit Withdrawn(depositId, msg.sender, principal, interest, false);
+    }
+
+    /// @notice Withdraws principal minus early penalty before maturity; no interest is paid.
+    /// @dev Only the current certificate owner may withdraw. Net principal is paid to owner;
+    /// penalty is paid to feeReceiver.
+    /// @param depositId ID of the active deposit to settle early.
+    function earlyWithdraw(uint256 depositId) external nonReentrant {
+        address actualCore = vaultManager.savingCore();
+        if (actualCore != address(this)) revert CoreNotBound(address(this), actualCore);
+        if (vaultManager.paused()) revert EnforcedPause();
+        if (depositId == 0 || depositId > depositCount) revert DepositNotFound(depositId);
+
+        Deposit storage deposit = _deposits[depositId];
+        if (deposit.status != DepositStatus.Active) {
+            revert DepositNotActive(depositId, deposit.status);
+        }
+        if (ownerOf(depositId) != msg.sender) {
+            revert NotDepositOwner(depositId, msg.sender);
+        }
+        if (block.timestamp >= deposit.maturityAt) {
+            revert EarlyWithdrawalClosed(depositId, deposit.maturityAt);
+        }
+
+        uint256 principal = deposit.principal;
+        uint256 penalty = _calculatePenalty(deposit);
+        uint256 netPayout = principal - penalty;
+        address feeReceiver = vaultManager.feeReceiver();
+
+        // Checks-Effects-Interactions: record terminal status and remove full principal liability
+        deposit.status = DepositStatus.Withdrawn;
+        totalPrincipal -= principal;
+
+        // Transfer net payout to owner if nonzero
+        if (netPayout > 0) {
+            token.safeTransfer(msg.sender, netPayout);
+        }
+
+        // Transfer penalty to feeReceiver if nonzero
+        if (penalty > 0) {
+            token.safeTransfer(feeReceiver, penalty);
+        }
+
+        emit Withdrawn(depositId, msg.sender, principal, 0, true);
+    }
+
+    /// @dev Computes full-term simple interest floored to smallest token units.
+    function _calculateInterest(Deposit memory deposit) internal pure returns (uint256) {
+        uint256 tenorSeconds = deposit.maturityAt - deposit.startAt;
+        return Math.mulDiv(
+            deposit.principal,
+            uint256(deposit.aprBpsAtOpen) * tenorSeconds,
+            SECONDS_PER_YEAR * BPS_DENOMINATOR
+        );
+    }
+
+    /// @dev Computes early withdrawal penalty floored to smallest token units.
+    function _calculatePenalty(Deposit memory deposit) internal pure returns (uint256) {
+        return Math.mulDiv(
+            deposit.principal,
+            uint256(deposit.penaltyBpsAtOpen),
+            BPS_DENOMINATOR
+        );
+    }
+
+    /// @dev Feasibility check only; does not reserve interest or transfer a payout.
+    function _fullTermPayout(uint256 principal, uint16 aprBps, uint256 tenorSeconds)
+        internal pure returns (uint256)
+    {
+        uint256 interest = Math.mulDiv(
+            principal, uint256(aprBps) * tenorSeconds, SECONDS_PER_YEAR * BPS_DENOMINATOR
+        );
+        return principal + interest;
     }
 }
