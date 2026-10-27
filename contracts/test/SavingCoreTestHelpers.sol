@@ -21,11 +21,30 @@ contract DepositCallerMock is Ownable {
     function open(uint256 planId, uint256 amount) external onlyOwner returns (uint256) {
         return core.openDeposit(planId, amount);
     }
+
+    function renew(uint256 depositId, uint256 newPlanId) external onlyOwner returns (uint256) {
+        return core.renewDeposit(depositId, newPlanId);
+    }
+
+    function autoRenew(uint256 depositId) external returns (uint256) {
+        return core.autoRenewDeposit(depositId);
+    }
 }
 
 /// @notice Test-only safeMint recipient exercising external callbacks and NFT forwarding.
 contract DepositReceiverMock is DepositCallerMock, IERC721Receiver {
-    enum Mode { Accept, Reject, WrongSelector, ReenterCaught, ReenterPropagated, Forward }
+    enum Mode {
+        Accept,
+        Reject,
+        WrongSelector,
+        ReenterCaught,
+        ReenterPropagated,
+        Forward,
+        ReenterRenewCaught,
+        ReenterRenewPropagated,
+        ReenterAutoRenewCaught,
+        ReenterAutoRenewPropagated
+    }
 
     Mode public mode;
     address public forwardTo;
@@ -57,6 +76,14 @@ contract DepositReceiverMock is DepositCallerMock, IERC721Receiver {
             try core.openDeposit(1, 1) {} catch (bytes memory reason) { reentryError = reason; }
         } else if (mode == Mode.ReenterPropagated) {
             core.openDeposit(1, 1);
+        } else if (mode == Mode.ReenterRenewCaught) {
+            try core.renewDeposit(tokenId, 1) {} catch (bytes memory reason) { reentryError = reason; }
+        } else if (mode == Mode.ReenterRenewPropagated) {
+            core.renewDeposit(tokenId, 1);
+        } else if (mode == Mode.ReenterAutoRenewCaught) {
+            try core.autoRenewDeposit(tokenId) {} catch (bytes memory reason) { reentryError = reason; }
+        } else if (mode == Mode.ReenterAutoRenewPropagated) {
+            core.autoRenewDeposit(tokenId);
         } else if (mode == Mode.Forward) {
             core.transferFrom(address(this), forwardTo, tokenId);
         }
