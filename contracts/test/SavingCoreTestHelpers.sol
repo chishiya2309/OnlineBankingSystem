@@ -29,6 +29,14 @@ contract DepositCallerMock is Ownable {
     function autoRenew(uint256 depositId) external returns (uint256) {
         return core.autoRenewDeposit(depositId);
     }
+
+    function withdrawAtMaturity(uint256 depositId) external onlyOwner {
+        core.withdrawAtMaturity(depositId);
+    }
+
+    function earlyWithdraw(uint256 depositId) external onlyOwner {
+        core.earlyWithdraw(depositId);
+    }
 }
 
 /// @notice Test-only safeMint recipient exercising external callbacks and NFT forwarding.
@@ -43,7 +51,11 @@ contract DepositReceiverMock is DepositCallerMock, IERC721Receiver {
         ReenterRenewCaught,
         ReenterRenewPropagated,
         ReenterAutoRenewCaught,
-        ReenterAutoRenewPropagated
+        ReenterAutoRenewPropagated,
+        ReenterMaturityWithdrawCaught,
+        ReenterMaturityWithdrawPropagated,
+        ReenterEarlyWithdrawCaught,
+        ReenterEarlyWithdrawPropagated
     }
 
     Mode public mode;
@@ -84,6 +96,14 @@ contract DepositReceiverMock is DepositCallerMock, IERC721Receiver {
             try core.autoRenewDeposit(tokenId) {} catch (bytes memory reason) { reentryError = reason; }
         } else if (mode == Mode.ReenterAutoRenewPropagated) {
             core.autoRenewDeposit(tokenId);
+        } else if (mode == Mode.ReenterMaturityWithdrawCaught) {
+            try core.withdrawAtMaturity(tokenId) {} catch (bytes memory reason) { reentryError = reason; }
+        } else if (mode == Mode.ReenterMaturityWithdrawPropagated) {
+            core.withdrawAtMaturity(tokenId);
+        } else if (mode == Mode.ReenterEarlyWithdrawCaught) {
+            try core.earlyWithdraw(tokenId) {} catch (bytes memory reason) { reentryError = reason; }
+        } else if (mode == Mode.ReenterEarlyWithdrawPropagated) {
+            core.earlyWithdraw(tokenId);
         } else if (mode == Mode.Forward) {
             core.transferFrom(address(this), forwardTo, tokenId);
         }
