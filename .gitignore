@@ -15,3 +15,6 @@ ignition/deployments/
 
 ~$*
 /document/Document.docx
+
+# Hallmark / AI Agent files
+/frontend/.agents/

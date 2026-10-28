@@ -1,0 +1,25 @@
+{
+  "network": "mismatchNet",
+  "chainId": 999999,
+  "deployedAt": "2026-10-28T07:57:03.672Z",
+  "deployer": "0x0000000000000000000000000000000000000000",
+  "bankAdmin": "0x0000000000000000000000000000000000000000",
+  "feeReceiver": "0x0000000000000000000000000000000000000000",
+  "contracts": {
+    "MockUSDC": {
+      "address": "0x0000000000000000000000000000000000000000",
+      "deploymentTxHash": "0x"
+    },
+    "VaultManager": {
+      "address": "0x0000000000000000000000000000000000000000",
+      "deploymentTxHash": "0x"
+    },
+    "SavingCore": {
+      "address": "0x0000000000000000000000000000000000000000",
+      "deploymentTxHash": "0x"
+    }
+  },
+  "binding": {
+    "verified": false
+  }
+}
