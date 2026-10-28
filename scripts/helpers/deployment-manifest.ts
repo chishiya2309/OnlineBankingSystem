@@ -7,6 +7,7 @@ const __dirname = path.dirname(__filename);
 export const PROJECT_ROOT = path.resolve(__dirname, "../..");
 export const DEPLOYMENTS_DIR = path.resolve(PROJECT_ROOT, "deployments");
 export const EXPORTS_DIR = path.resolve(PROJECT_ROOT, "exports/contracts");
+export const FRONTEND_CONTRACTS_DIR = path.resolve(PROJECT_ROOT, "frontend/src/contracts");
 export const ARTIFACTS_DIR = path.resolve(PROJECT_ROOT, "artifacts/contracts");
 
 export interface ContractDeploymentRecord {
@@ -124,6 +125,13 @@ export async function exportContracts(manifest: DeploymentManifest): Promise<voi
 
     const outPath = path.resolve(EXPORTS_DIR, `${name}.json`);
     await fs.writeFile(outPath, JSON.stringify(exportData, null, 2), "utf-8");
+
+    try {
+      await fs.mkdir(FRONTEND_CONTRACTS_DIR, { recursive: true });
+      await fs.writeFile(path.resolve(FRONTEND_CONTRACTS_DIR, `${name}.json`), JSON.stringify(exportData, null, 2), "utf-8");
+    } catch {
+      // Optional for test harnesses
+    }
   }
 
   // Update networks.json
@@ -154,4 +162,10 @@ export async function exportContracts(manifest: DeploymentManifest): Promise<voi
 
   await fs.writeFile(networksPath, JSON.stringify(networks, null, 2), "utf-8");
 
+  try {
+    await fs.mkdir(FRONTEND_CONTRACTS_DIR, { recursive: true });
+    await fs.writeFile(path.resolve(FRONTEND_CONTRACTS_DIR, "networks.json"), JSON.stringify(networks, null, 2), "utf-8");
+  } catch {
+    // Optional
+  }
 }

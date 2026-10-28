@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#181b29" />
+      <stop offset="100%" stop-color="#0b0d14" />
+    </linearGradient>
+
+    <!-- Periwinkle Primary Brand Gradient -->
+    <linearGradient id="periGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b6aeff" />
+      <stop offset="100%" stop-color="#7e72fc" />
+    </linearGradient>
+
+    <!-- Apricot Secondary Yield Gradient -->
+    <linearGradient id="apricotGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffcf96" />
+      <stop offset="100%" stop-color="#f59e51" />
+    </linearGradient>
+
+    <!-- Subtle Outer Shadow -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#7e72fc" flood-opacity="0.35" />
+    </filter>
+  </defs>
+
+  <!-- Squircle Base with Lit Edge -->
+  <rect x="2" y="2" width="60" height="60" rx="16" ry="16" fill="url(#bgGrad)" stroke="#31364d" stroke-width="1.5" />
+  
+  <!-- Subtle Inner Top Highlight -->
+  <path d="M 18 3.5 Q 32 3 46 3.5" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1" stroke-linecap="round" fill="none" />
+
+  <!-- Iconic Monogram: Stylized Architectural 'L' for LEDGER -->
+  <g filter="url(#softGlow)">
+    <!-- Vertical Pillar -->
+    <rect x="16" y="15" width="8" height="34" rx="4" fill="url(#periGrad)" />
+    
+    <!-- Base Ledger Platform -->
+    <rect x="16" y="41" width="32" height="8" rx="4" fill="url(#periGrad)" />
+    
+    <!-- Vault / Term Yield Cube (Apricot Diamond) -->
+    <rect x="30" y="19" width="15" height="15" rx="4" fill="url(#apricotGrad)" transform="rotate(12 37.5 26.5)" stroke="rgba(255,255,255,0.4)" stroke-width="1" />
+    
+    <!-- Center Vault Core Indicator -->
+    <circle cx="38" cy="27" r="2.5" fill="#181b29" />
+  </g>
+</svg>
