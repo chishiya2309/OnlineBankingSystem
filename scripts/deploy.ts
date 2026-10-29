@@ -134,10 +134,11 @@ export async function deployContracts(options: DeployOptions = {}): Promise<Depl
   console.log(`Fee Receiver Address: ${feeReceiverAddress}`);
 
   // Load existing manifest for checkpoint resumption (unless forced redeploy or chainId mismatch)
-  const existingManifest = options.forceRedeploy ? null : await readManifest(networkName);
-  const canResume = existingManifest && existingManifest.chainId === chainId;
+  const isForceRedeploy = Boolean(options.forceRedeploy || process.argv.includes("--force") || process.env.FORCE_REDEPLOY === "true");
+  const previousManifest = await readManifest(networkName);
+  const canResume = !isForceRedeploy && previousManifest && previousManifest.chainId === chainId;
   const manifest: DeploymentManifest = canResume
-    ? existingManifest
+    ? previousManifest
     : {
         network: networkName,
         chainId,
@@ -148,6 +149,13 @@ export async function deployContracts(options: DeployOptions = {}): Promise<Depl
         contracts: {} as any,
         binding: { verified: false },
       };
+
+  // If force-redeploying, retain existing MockUSDC if it has bytecode to conserve gas
+  if (isForceRedeploy && previousManifest?.contracts?.MockUSDC) {
+    manifest.contracts.MockUSDC = previousManifest.contracts.MockUSDC;
+    console.log(`[FORCE_REDEPLOY] Preserving existing MockUSDC (${previousManifest.contracts.MockUSDC.address}) to conserve gas.`);
+  }
+
   manifest.chainId = chainId;
   manifest.deployer = deployer.address;
   manifest.bankAdmin = bankAdminAddress;

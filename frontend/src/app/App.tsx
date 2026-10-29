@@ -298,6 +298,7 @@ export const App: React.FC = () => {
               blockExplorerUrl={currentNetwork?.blockExplorerUrl}
               savingCoreAddress={contracts.addresses?.SavingCore}
               vaultManagerAddress={contracts.addresses?.VaultManager}
+              savingCore={contracts.savingCore}
             />
           )}
         </div>

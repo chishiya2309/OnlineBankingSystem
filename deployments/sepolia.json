@@ -1,7 +1,7 @@
 {
   "network": "sepolia",
   "chainId": 11155111,
-  "deployedAt": "2026-10-28T08:24:38.338Z",
+  "deployedAt": "2026-10-29T06:50:23.899Z",
   "deployer": "0xA4CDcB4eFd9D4615586a6d78CB1283656078249c",
   "bankAdmin": "0xA4CDcB4eFd9D4615586a6d78CB1283656078249c",
   "feeReceiver": "0xA4CDcB4eFd9D4615586a6d78CB1283656078249c",
@@ -12,23 +12,23 @@
       "blockNumber": 12011057
     },
     "VaultManager": {
-      "address": "0x2c46fFeFb05188204D3653Ea402C9A65EB8c195a",
-      "deploymentTxHash": "0x6fb740f072aa91817ccbfc3ffa60fc68371bca504cf80dcbf432538482720040",
-      "blockNumber": 12011058
+      "address": "0xa8b6894DD023CaaAF525Deb984d31F9b8cf554BF",
+      "deploymentTxHash": "0x548ecb9c8a6b55866d4fe0ef5bd7abd8445be336e3ffab4fd38f112f3733d4e8",
+      "blockNumber": 12017817
     },
     "SavingCore": {
-      "address": "0x412a613320E537226D896e5B6Cd3EE439979E276",
-      "deploymentTxHash": "0x08f6536d991196745e431d8253670b3047c2850af2e6ee87cbae8953f5512efd",
-      "blockNumber": 12011099
+      "address": "0x53Df4c13Ba0E7d9e48B1E002dA3098b9a64c5464",
+      "deploymentTxHash": "0xcdd61c4c20bbed7f13714b9c44c43aea083e93933a986b2af87313db8392e581",
+      "blockNumber": 12017818
     }
   },
   "binding": {
-    "txHash": "0xa7faaf437c8c4820fc0cbdc6d87b327a6c3cf059cde87cd5a3e019e0f1bc182c",
+    "txHash": "0x00d1dee9950ecb62d0067c6384d0950299826d0e8c0a2ff16ff764a3ecaf342d",
     "verified": true
   },
   "seed": {
     "verified": true,
-    "seededAt": "2026-10-28T08:26:25.243Z",
+    "seededAt": "2026-10-29T06:54:35.352Z",
     "planCount": 3,
     "vaultFundedAmount": "5000.0",
     "demoUserMinted": "5000.0"

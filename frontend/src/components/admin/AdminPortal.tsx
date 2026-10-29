@@ -1,4 +1,5 @@
 import React from "react";
+import { ethers } from "ethers";
 import type { SavingPlan } from "../../types";
 import { useAdmin } from "../../hooks/useAdmin";
 import { shortenAddress } from "../../lib/format";
@@ -6,6 +7,7 @@ import { AdminRestrictedState } from "./AdminRestrictedState";
 import { AdminSystemCard } from "./AdminSystemCard";
 import { AdminVaultCard } from "./AdminVaultCard";
 import { AdminPlansManager } from "./AdminPlansManager";
+import { AdminMaturityManager } from "./AdminMaturityManager";
 
 interface AdminPortalProps {
   admin: ReturnType<typeof useAdmin>;
@@ -16,6 +18,7 @@ interface AdminPortalProps {
   blockExplorerUrl?: string;
   savingCoreAddress?: string | null;
   vaultManagerAddress?: string | null;
+  savingCore?: ethers.Contract | null;
 }
 
 export const AdminPortal: React.FC<AdminPortalProps> = ({
@@ -26,6 +29,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   blockExplorerUrl,
   savingCoreAddress,
   vaultManagerAddress,
+  savingCore,
 }) => {
   const { summary } = admin;
 
@@ -179,6 +183,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           onCreatePlan={admin.createPlan}
           onUpdatePlanApr={admin.updatePlanApr}
           onTogglePlanStatus={admin.togglePlanStatus}
+        />
+
+        {/* Row 3: Sepolia Deposit Maturity Controller */}
+        <AdminMaturityManager
+          savingCore={savingCore ?? null}
+          status={admin.status}
+          onSetDepositTimeline={admin.setDepositTimeline}
         />
       </div>
     </div>

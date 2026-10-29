@@ -76,8 +76,11 @@ export function parseTransactionError(error: any): string {
   }
 
   // Admin custom errors
-  if (lowerMsg.includes("onlybankadmin") || lowerMsg.includes("ownableunauthorizedaccount")) {
+  if (lowerMsg.includes("notbankadmin") || lowerMsg.includes("onlybankadmin") || lowerMsg.includes("ownableunauthorizedaccount")) {
     return "Action rejected: Connected wallet is not the authorized Bank Admin.";
+  }
+  if (lowerMsg.includes("invaliddeposittimeline")) {
+    return "Invalid deposit timeline: Maturity timestamp must be strictly greater than start timestamp.";
   }
   if (lowerMsg.includes("planpenaltytoohigh")) {
     return "Penalty rate cannot exceed 100% (10,000 basis points).";

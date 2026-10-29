@@ -243,6 +243,12 @@ export const DepositDetailModal: React.FC<DepositDetailModalProps> = ({
             </>
           )}
         </div>
+
+        {isActive && !deposit.isMatured && (
+          <div style={{ marginTop: "14px", padding: "10px 14px", background: "rgba(100, 150, 255, 0.08)", borderRadius: "8px", fontSize: "12px", color: "var(--color-muted)", border: "1px dashed var(--color-border)" }}>
+            💡 <strong>Sepolia Testing Tip:</strong> Bank Administrators can fast-forward this deposit to maturity immediately in the <strong>Admin Portal</strong> tab.
+          </div>
+        )}
       </div>
     </div>
   );

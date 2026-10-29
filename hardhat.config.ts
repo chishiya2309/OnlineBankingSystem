@@ -34,6 +34,12 @@ export default defineConfig({
   plugins: [hardhatToolboxMochaEthers],
   solidity: {
     version: "0.8.34",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200,
+      },
+    },
   },
   networks: {
     hardhatMainnet: {

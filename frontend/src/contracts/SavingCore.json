@@ -289,6 +289,22 @@
       "inputs": [
         {
           "internalType": "uint256",
+          "name": "newStartAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "newMaturityAt",
+          "type": "uint256"
+        }
+      ],
+      "name": "InvalidDepositTimeline",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
           "name": "secondsValue",
           "type": "uint256"
         }
@@ -479,6 +495,43 @@
         }
       ],
       "name": "DepositOpened",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "depositId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "oldStartAt",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "oldMaturityAt",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newStartAt",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newMaturityAt",
+          "type": "uint256"
+        }
+      ],
+      "name": "DepositTimelineUpdated",
       "type": "event"
     },
     {
@@ -1148,6 +1201,29 @@
         }
       ],
       "name": "setApprovalForAll",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "depositId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "newStartAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "newMaturityAt",
+          "type": "uint256"
+        }
+      ],
+      "name": "setDepositTimeline",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

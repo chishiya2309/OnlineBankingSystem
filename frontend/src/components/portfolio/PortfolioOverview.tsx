@@ -20,7 +20,7 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
       <div className="section-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
         <div>
           <h3 className="section-title">Deposit Portfolio Overview</h3>
-          <p className="section-desc">
+          <p className="section-caption">
             Aggregated metrics for on-chain term deposit certificates held by your connected wallet.
           </p>
         </div>
@@ -42,6 +42,7 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
           <span className="metric-label">Total Active Principal</span>
           <div className="metric-value-container">
             <span className="metric-value tabular-num">{summary.totalActivePrincipalFormatted}</span>
+            {" "}
             <span className="metric-unit">USDC</span>
           </div>
           <span className="metric-subtext">Excludes withdrawn & renewed deposits</span>
@@ -52,6 +53,7 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
           <span className="metric-label">Active Certificates</span>
           <div className="metric-value-container">
             <span className="metric-value tabular-num">{summary.activeCount}</span>
+            {" "}
             <span className="metric-unit">SDC NFTs</span>
           </div>
           <span className="metric-subtext">Transferable ERC721 certificates</span>
@@ -60,13 +62,13 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
         {/* Metric 3: Upcoming Maturity */}
         <div className="metric-card glass-panel">
           <span className="metric-label">Next Maturity</span>
-          <div className="metric-value-container" style={{ fontSize: "16px", minHeight: "36px", display: "flex", alignItems: "center" }}>
+          <div className="metric-value-container" style={{ alignItems: "center" }}>
             {summary.upcomingMaturity ? (
-              <span className="tabular-num" style={{ fontWeight: 600, color: "var(--color-ink)" }}>
+              <span className="metric-value-date tabular-num">
                 {formatTimestamp(summary.upcomingMaturity)}
               </span>
             ) : (
-              <span style={{ color: "var(--color-muted)", fontSize: "14px" }}>No upcoming active maturity</span>
+              <span className="metric-subtext">No upcoming active maturity</span>
             )}
           </div>
           <span className="metric-subtext">
@@ -78,9 +80,10 @@ export const PortfolioOverview: React.FC<PortfolioOverviewProps> = ({
         <div className="metric-card glass-panel">
           <span className="metric-label">Contractual Yield Snapshot</span>
           <div className="metric-value-container">
-            <span className="metric-value tabular-num" style={{ color: "var(--color-accent)" }}>
+            <span className="metric-value tabular-num metric-accent">
               +{summary.totalEstimatedInterestFormatted}
             </span>
+            {" "}
             <span className="metric-unit">USDC</span>
           </div>
           <span className="metric-subtext">Full-term contractual yield upon maturity</span>

@@ -446,6 +446,61 @@ export function useAdmin(
     [mockUSDC, account, fetchAdminData, onSuccessCallback]
   );
 
+  // 9. Set Deposit Timeline (Sepolia testing / maturity control)
+  const setDepositTimeline = useCallback(
+    async (
+      depositId: number,
+      newStartAt: number,
+      newMaturityAt: number
+    ): Promise<boolean> => {
+      if (!savingCore || !account) {
+        setError("SavingCore contract or wallet not connected.");
+        return false;
+      }
+
+      if (depositId <= 0) {
+        setError("Valid deposit ID is required.");
+        return false;
+      }
+
+      if (newMaturityAt <= newStartAt) {
+        setError("Maturity timestamp must be strictly greater than start timestamp.");
+        return false;
+      }
+
+      try {
+        setStatus("awaiting-signature");
+        setError(null);
+
+        const tx = await savingCore.setDepositTimeline(
+          BigInt(depositId),
+          BigInt(newStartAt),
+          BigInt(newMaturityAt)
+        );
+        setStatus("pending");
+        const receipt = await tx.wait();
+
+        setStatus("success");
+        setLatestResult({
+          action: "Deposit Timeline Updated",
+          txHash: receipt.hash,
+          details: `Deposit #${depositId} adjusted: Start = ${new Date(newStartAt * 1000).toLocaleString()}, Maturity = ${new Date(newMaturityAt * 1000).toLocaleString()}.`,
+          blockNumber: receipt.blockNumber,
+        });
+
+        await fetchAdminData();
+        onSuccessCallback?.();
+        return true;
+      } catch (err) {
+        console.error("Failed to update deposit timeline:", err);
+        setError(parseTransactionError(err));
+        setStatus("error");
+        return false;
+      }
+    },
+    [savingCore, account, fetchAdminData, onSuccessCallback]
+  );
+
   const resetStatus = useCallback(() => {
     setStatus("idle");
     setError(null);
@@ -465,6 +520,7 @@ export function useAdmin(
     togglePause,
     setFeeReceiver,
     mintAdminDemoTokens,
+    setDepositTimeline,
     refetch: fetchAdminData,
     resetStatus,
   };
