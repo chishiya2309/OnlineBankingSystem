@@ -6,12 +6,14 @@ interface TransactionReceiptCardProps {
   confirmedDeposit: ConfirmedDepositResult;
   chainId: number | null;
   onReset: () => void;
+  onViewInPortfolio?: () => void;
 }
 
 export const TransactionReceiptCard: React.FC<TransactionReceiptCardProps> = ({
   confirmedDeposit,
   chainId,
   onReset,
+  onViewInPortfolio,
 }) => {
   const explorerTx =
     chainId === 11155111
@@ -99,14 +101,24 @@ export const TransactionReceiptCard: React.FC<TransactionReceiptCardProps> = ({
         </div>
       </div>
 
-      <div style={{ marginTop: "20px" }}>
+      <div style={{ marginTop: "20px", display: "flex", gap: "10px", flexDirection: "column" }}>
+        {onViewInPortfolio && (
+          <button
+            type="button"
+            className="btn btn-primary btn-sm text-nowrap"
+            onClick={onViewInPortfolio}
+            style={{ width: "100%", whiteSpace: "nowrap" }}
+          >
+            <span style={{ whiteSpace: "nowrap" }}>View Certificate in Portfolio</span>
+          </button>
+        )}
         <button
           type="button"
           className="btn btn-secondary btn-sm text-nowrap"
           onClick={onReset}
           style={{ width: "100%", whiteSpace: "nowrap" }}
         >
-          Open Another Term Deposit
+          <span style={{ whiteSpace: "nowrap" }}>Open Another Term Deposit</span>
         </button>
       </div>
     </div>

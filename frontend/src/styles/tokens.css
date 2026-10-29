@@ -33,6 +33,17 @@
   --color-alert-warning-bg: oklch(25% 0.05 60);
   --color-alert-error-bg: oklch(25% 0.05 330);
   --color-badge-active-text: oklch(95% 0.04 274);
+  --color-backdrop: oklch(10% 0.015 268 / 0.75);
+  --shadow-tab-active: 0 1px 3px oklch(0% 0 0 / 0.3);
+  --color-danger: oklch(62% 0.22 28);
+  --color-danger-bg: oklch(25% 0.08 28);
+  --color-danger-hover: oklch(55% 0.22 28);
+  --color-paused-bg: oklch(25% 0.08 30);
+  --color-paused-text: oklch(85% 0.14 30);
+  --color-normal-bg: oklch(25% 0.08 145);
+  --color-normal-text: oklch(85% 0.14 145);
+  --color-table-header: oklch(20% 0.016 268);
+  --color-table-row-hover: oklch(22% 0.018 268);
   --glass: oklch(22% 0.018 268 / 0.58);
   --glass-blur: 22px;
   --glass-hi: inset 0 1px 0 oklch(100% 0 0 / 0.10), inset 0 0 0 1px oklch(100% 0 0 / 0.06);
@@ -47,3 +58,4 @@
   --display-weight: 500;
   --max-width-container: 1240px;
 }
+

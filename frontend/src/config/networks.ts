@@ -13,7 +13,7 @@ export const SUPPORTED_NETWORKS: Record<number, NetworkConfig> = {
     chainId: 11155111,
     name: "sepolia",
     displayName: "Ethereum Sepolia",
-    rpcUrl: "https://rpc.sepolia.org",
+    rpcUrl: "https://ethereum-sepolia-rpc.publicnode.com",
     currencySymbol: "ETH",
     blockExplorerUrl: "https://sepolia.etherscan.io",
     isTestnet: true,

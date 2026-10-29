@@ -26,6 +26,7 @@
     "deploy:localhost": "hardhat run scripts/deploy.ts --network localhost",
     "seed:localhost": "hardhat run scripts/seed.ts --network localhost",
     "verify-deploy:localhost": "hardhat run scripts/verify-deployment.ts --network localhost",
+    "time:advance": "hardhat run scripts/demo/advance-local-time.ts --network localhost",
     "frontend:install": "npm --prefix frontend install",
     "frontend:dev": "npm --prefix frontend run dev",
     "frontend:build": "npm --prefix frontend run build",

@@ -3,7 +3,7 @@
   "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   "deploymentTxHash": "0x61e2b6d344c0bfcb635c528dc18026a79ca3b49d6c3bf3f7361e18d4c757ff50",
   "blockNumber": 1,
-  "network": "hardhatMainnet",
+  "network": "localhost",
   "chainId": 31337,
   "abi": [
     {
