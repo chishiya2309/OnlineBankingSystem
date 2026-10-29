@@ -82,11 +82,12 @@ export const App: React.FC = () => {
 
   // Default select first enabled plan
   React.useEffect(() => {
-    if (!selectedPlan && savingPlans.plans.length > 0) {
-      const defaultPlan = savingPlans.plans.find((p) => p.enabled) || savingPlans.plans[0];
-      setSelectedPlan(defaultPlan);
-    }
-  }, [savingPlans.plans, selectedPlan]);
+    setSelectedPlan((previous) =>
+      savingPlans.plans.find((plan) => plan.planId === previous?.planId && plan.enabled)
+      ?? savingPlans.plans.find((plan) => plan.enabled)
+      ?? null
+    );
+  }, [savingPlans.plans]);
 
   // Refresh portfolio whenever an open deposit succeeds
   const handleOpenDeposit = async (plan: SavingPlan, amount: string) => {
@@ -298,7 +299,6 @@ export const App: React.FC = () => {
               blockExplorerUrl={currentNetwork?.blockExplorerUrl}
               savingCoreAddress={contracts.addresses?.SavingCore}
               vaultManagerAddress={contracts.addresses?.VaultManager}
-              savingCore={contracts.savingCore}
             />
           )}
         </div>

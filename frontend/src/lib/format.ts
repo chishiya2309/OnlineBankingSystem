@@ -4,17 +4,18 @@ import { ethers } from "ethers";
  * Formats 6-decimal token units to human-readable locale string with 2 decimal places.
  * Example: 1000000000n -> "1,000.00"
  */
-export function formatUSDC(rawUnits: bigint | string | number | undefined | null): string {
-  if (rawUnits === undefined || rawUnits === null) return "0.00";
+export function formatUSDC(rawUnits: bigint | string | number | undefined | null, decimals: 2 | 6 = 2): string {
+  const zero = `0.${"0".repeat(decimals)}`;
+  if (rawUnits === undefined || rawUnits === null) return zero;
   try {
     const rawBigInt = typeof rawUnits === "bigint" ? rawUnits : BigInt(rawUnits.toString());
     const formatted = ethers.formatUnits(rawBigInt, 6);
     const parts = formatted.split(".");
-    const whole = Number(parts[0]).toLocaleString("en-US");
-    const decimal = parts[1] ? parts[1].padEnd(2, "0").slice(0, 2) : "00";
+    const whole = BigInt(parts[0]).toLocaleString("en-US");
+    const decimal = (parts[1] || "").padEnd(decimals, "0").slice(0, decimals);
     return `${whole}.${decimal}`;
   } catch {
-    return "0.00";
+    return zero;
   }
 }
 
@@ -55,6 +56,18 @@ export function formatDurationDays(days: number): string {
   return `${days} days`;
 }
 
+/** Exact duration, including sub-day terms; never rounds a short plan to zero days. */
+export function formatDurationSeconds(seconds: number): string {
+  let remaining = seconds;
+  const parts: string[] = [];
+  for (const [size, unit] of [[86400, "day"], [3600, "hour"], [60, "minute"], [1, "second"]] as const) {
+    const value = Math.floor(remaining / size);
+    if (value > 0) parts.push(`${value} ${unit}${value === 1 ? "" : "s"}`);
+    remaining %= size;
+  }
+  return parts.join(" ") || "0 seconds";
+}
+
 /**
  * Formats UNIX epoch timestamp (seconds) into standard readable date.
  */
@@ -68,6 +81,7 @@ export function formatTimestamp(timestampSec: number | bigint): string {
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    second: "2-digit",
   });
 }
 

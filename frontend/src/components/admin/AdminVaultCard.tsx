@@ -5,7 +5,7 @@ interface AdminVaultCardProps {
   summary: AdminSummary;
   status: AdminActionStatus;
   onFundVault: (amount: string) => Promise<boolean>;
-  onWithdrawLiquidity: (amount: string, toAddress: string) => Promise<boolean>;
+  onWithdrawLiquidity: (amount: string) => Promise<boolean>;
   onMintDemoTokens: (amount: string) => Promise<boolean>;
 }
 
@@ -18,7 +18,6 @@ export const AdminVaultCard: React.FC<AdminVaultCardProps> = ({
 }) => {
   const [fundAmount, setFundAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
-  const [withdrawTo, setWithdrawTo] = useState("");
   const [isMinting, setIsMinting] = useState(false);
 
   const isBusy = status === "awaiting-signature" || status === "pending" || isMinting;
@@ -34,11 +33,10 @@ export const AdminVaultCard: React.FC<AdminVaultCardProps> = ({
 
   const handleWithdrawSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!withdrawAmount.trim() || !withdrawTo.trim()) return;
-    const ok = await onWithdrawLiquidity(withdrawAmount.trim(), withdrawTo.trim());
+    if (!withdrawAmount.trim()) return;
+    const ok = await onWithdrawLiquidity(withdrawAmount.trim());
     if (ok) {
       setWithdrawAmount("");
-      setWithdrawTo("");
     }
   };
 
@@ -125,7 +123,7 @@ export const AdminVaultCard: React.FC<AdminVaultCardProps> = ({
         <div className="admin-action-info" style={{ marginBottom: "12px" }}>
           <span className="admin-action-label">Withdraw surplus liquidity</span>
           <span className="admin-action-sub">
-            Remove unused liquidity from the vault to a designated destination address.
+            Withdraw liquidity from the vault to the connected bank admin wallet. This operation does not reserve future interest.
           </span>
         </div>
 
@@ -141,19 +139,11 @@ export const AdminVaultCard: React.FC<AdminVaultCardProps> = ({
               onChange={(e) => setWithdrawAmount(e.target.value)}
               disabled={isBusy}
             />
-            <input
-              type="text"
-              className="input-field tabular-num"
-              placeholder="0x… Destination address"
-              value={withdrawTo}
-              onChange={(e) => setWithdrawTo(e.target.value)}
-              disabled={isBusy}
-            />
           </div>
           <button
             type="submit"
             className="btn btn-secondary btn-sm text-nowrap"
-            disabled={isBusy || !withdrawAmount.trim() || !withdrawTo.trim()}
+            disabled={isBusy || !withdrawAmount.trim()}
             style={{ alignSelf: "flex-end", whiteSpace: "nowrap" }}
           >
             {isBusy ? "Processing…" : "Withdraw liquidity"}

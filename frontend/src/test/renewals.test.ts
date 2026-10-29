@@ -15,6 +15,7 @@ describe("Renewal Action Matrix & Compounding Tests (MR-UI-001 to AR-UI-006)", (
   const targetPlan2: SavingPlan = {
     planId: 2,
     tenorDays: 365,
+    tenorSeconds: 365 * 86400,
     aprBps: 500, // 5.00%
     aprPercent: "5.00%",
     minDeposit: 500000000n, // 500 USDC

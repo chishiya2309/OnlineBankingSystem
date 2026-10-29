@@ -9,6 +9,12 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      ...(process.env.BANKING_ARTIFACT_ROOT ? Object.fromEntries(
+        ["MockUSDC", "SavingCore", "VaultManager", "networks"].map((name) => [
+          `../contracts/${name}.json`,
+          path.resolve(__dirname, "..", process.env.BANKING_ARTIFACT_ROOT!, "frontend/src/contracts", `${name}.json`),
+        ])
+      ) : {}),
     },
   },
   server: {

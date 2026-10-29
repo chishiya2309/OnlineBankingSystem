@@ -1,0 +1,2504 @@
+{
+  "task": "D5-02",
+  "date": "2026-10-29",
+  "timezone": "Asia/Saigon",
+  "chainId": 31337,
+  "wallet": "Injected EIP-1193 forwarding real transactions to unlocked Hardhat accounts",
+  "manualMetaMaskExecuted": false,
+  "contractRegressionPassing": 524,
+  "frontendTestsPassing": 71,
+  "sourceSha256": {
+    "e2e/banking.spec.ts": "0c6eef339c3bdd9fac7ad4830b4d3e61ae06396b2022f8264fc9d736d06e1773",
+    "e2e/fixtures.ts": "cf0bb91663280ace51d2ad2bb891795254220847854fe34b808f012b796c203b",
+    "playwright.config.ts": "07be30633eaa9212650353fd06f10c821de024c16e674a922c3c5bcbaf2ca1ca",
+    "frontend/src/components/portfolio/ManualRenewDialog.tsx": "24236b90173f56c7f031e29308ed7b33468721315a0c0ee662a708b5420129bb",
+    "frontend/src/lib/errors.ts": "6adb2576249ada48e72fdc35260b8d55d41796f7ab73189a115e4965318b83db",
+    "frontend/src/hooks/useAdmin.ts": "e5f14d19fe10099db48df41ee0879cfe0529ca4ea54086d887060ce95ad6de08",
+    "contracts/SavingCore.sol": "65d8228dd17015d4a4f35ae9224926dc4ffa6ecb7cd3cba9ea60ddc2efb13c0f",
+    "contracts/VaultManager.sol": "43d8866e7f6c16089e12ef11629348155829fe9832a261d237d34c8b3c8e3da5"
+  },
+  "runs": [
+    {
+      "name": "run1",
+      "stats": {
+        "startTime": "2026-10-29T14:16:06.388Z",
+        "duration": 62644.783,
+        "expected": 9,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "contracts": {
+        "MockUSDC": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        "SavingCore": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+        "VaultManager": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+      },
+      "scenarios": [
+        {
+          "scenario": "A01 create, update, disable and enable plans with immutable deposit snapshots",
+          "status": "passed",
+          "assertions": {
+            "createdPlan": "4",
+            "existingDeposit": "2",
+            "snapshotAprBps": 200,
+            "newDeposit": "3",
+            "newAprBps": 300,
+            "reenabled": true
+          },
+          "transactions": [
+            {
+              "hash": "0xc017efd8520592768ee540f6c94c091eca6ee485ea88ab79c9f0383c34bb2f3b",
+              "blockNumber": 14,
+              "timestamp": 1793283440,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "spender": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xd9058262d263d2a1f0b2b61f26b35291982050c2bed7703156fc6ba6c7a99778",
+              "blockNumber": 15,
+              "timestamp": 1793283441,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "2"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835441",
+                    "aprBpsAtOpen": "200"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x9ca542d8d931be6b64777a73e5221a41454d3f9b1026ad2c524d394d280d6cb1",
+              "blockNumber": 16,
+              "timestamp": 1793283442,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "PlanCreated",
+                  "args": {
+                    "planId": "4",
+                    "tenorDays": "45",
+                    "aprBps": "600"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x4e50584228c8467b4cb53955aff10986f062b97b22a77c37f6bd17f8fb73cffb",
+              "blockNumber": 17,
+              "timestamp": 1793283443,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "PlanUpdated",
+                  "args": {
+                    "planId": "1",
+                    "newAprBps": "300"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x0714865c3a6d1599ff1819b4a0d83a95c5e6462ee4afd997128d5491295902aa",
+              "blockNumber": 18,
+              "timestamp": 1793283444,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "PlanEnabledChanged",
+                  "args": {
+                    "planId": "1",
+                    "enabled": false
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x37f77d70de36639783cbb5d64b7e77d29b041388fb7ab52bf0a00ed22a6447ac",
+              "blockNumber": 19,
+              "timestamp": 1793283445,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "PlanEnabledChanged",
+                  "args": {
+                    "planId": "1",
+                    "enabled": true
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x8a54e2ffd451a0fec643907fc6a89426a0de9cc14cdaabd41402dd6ad33d3e0e",
+              "blockNumber": 20,
+              "timestamp": 1793283446,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "spender": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xa0e96445f97a207059e61f69a05c2c8c33223b7f5d81b3a15d47bc511aece389",
+              "blockNumber": 21,
+              "timestamp": 1793283447,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "3"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "3",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835447",
+                    "aprBpsAtOpen": "300"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "scenario": "A02 admin mint, approve, fund vault and withdraw to admin",
+          "status": "passed",
+          "assertions": {
+            "adminBefore": "0",
+            "adminAfter": "4700000000",
+            "minted": "5000000000",
+            "funded": "500000000",
+            "withdrawn": "200000000",
+            "vaultBefore": "5000000000",
+            "vaultAfter": "5300000000",
+            "coreUnchanged": "1000000000"
+          },
+          "transactions": [
+            {
+              "hash": "0xe90bd677e565b5f4e9d250b4abd96f43ae8cf3a17ddf66f1938747af7bc58220",
+              "blockNumber": 14,
+              "timestamp": 1793283451,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                    "value": "5000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x50235d6c9800e8903a5fb45cddf799f85d4f473e07de7d72a32eb9177f3634a5",
+              "blockNumber": 15,
+              "timestamp": 1793283452,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                    "spender": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                    "value": "500000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x9c6700ad7d034a9e23fcc088a025974b670e4aab6aa0bfff9eb8f3b6783416d1",
+              "blockNumber": 16,
+              "timestamp": 1793283453,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                    "to": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                    "value": "500000000"
+                  }
+                },
+                {
+                  "contract": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                  "name": "VaultFunded",
+                  "args": {
+                    "admin": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                    "amount": "500000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x63289ac1f3091399cbaf6000f5695feefe044f9796522b1d7994f8481fd7c9fe",
+              "blockNumber": 17,
+              "timestamp": 1793283454,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                    "to": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                    "value": "200000000"
+                  }
+                },
+                {
+                  "contract": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                  "name": "VaultWithdrawn",
+                  "args": {
+                    "admin": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                    "amount": "200000000"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "scenario": "A03 fee receiver, pause blocks settlement, unpause recovers",
+          "status": "passed",
+          "assertions": {
+            "depositId": "2",
+            "receiver": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+            "receiverBefore": "0",
+            "receiverAfter": "35000000",
+            "pausedSettlementBlocked": true,
+            "recovered": true
+          },
+          "transactions": [
+            {
+              "hash": "0xc017efd8520592768ee540f6c94c091eca6ee485ea88ab79c9f0383c34bb2f3b",
+              "blockNumber": 14,
+              "timestamp": 1793283457,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "spender": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xd9058262d263d2a1f0b2b61f26b35291982050c2bed7703156fc6ba6c7a99778",
+              "blockNumber": 15,
+              "timestamp": 1793283458,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "2"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835458",
+                    "aprBpsAtOpen": "200"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x7f304018475e063a928404095f34562c30446fb2735d828a656af831476e025e",
+              "blockNumber": 16,
+              "timestamp": 1793283459,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                  "name": "FeeReceiverUpdated",
+                  "args": {
+                    "previousReceiver": "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+                    "newReceiver": "0x90F79bf6EB2c4f870365E785982E1f101E93b906"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x931e48479b18c428e7037fab4e507a6112e2ed7fe50f252cf6ef450599e458a2",
+              "blockNumber": 17,
+              "timestamp": 1793283460,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                  "name": "Paused",
+                  "args": {
+                    "account": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xe227635f23f1cb829ce18bd2d6696bf205697792bc6d110c2f09bce0edecfbf1",
+              "blockNumber": 18,
+              "timestamp": 1793283461,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                  "name": "Unpaused",
+                  "args": {
+                    "account": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x4e60c0bad5f1aacafb66a04dde0198a5ce8086934fa8e4ce374e5e5672ee01a9",
+              "blockNumber": 19,
+              "timestamp": 1793283462,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "value": "965000000"
+                  }
+                },
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "to": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+                    "value": "35000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Withdrawn",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "principal": "1000000000",
+                    "interest": "0",
+                    "isEarly": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "scenario": "U01 connect, faucet, approve, open and reuse allowance",
+          "status": "passed",
+          "assertions": {
+            "principalEach": "1000000000",
+            "count": 2,
+            "beforeBalance": "9000000000",
+            "afterBalance": "8000000000",
+            "allowance": "0"
+          },
+          "transactions": [
+            {
+              "hash": "0x6377d4e1702a4d8bb47a3a4504632111cf7b40061c480232cfb7af53bee72ce0",
+              "blockNumber": 14,
+              "timestamp": 1793283399,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "value": "1000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x70ef9198ee50dd9db99804bb5c4d8ef85f1a5053d801982d84cd2e7770528c0c",
+              "blockNumber": 15,
+              "timestamp": 1793283400,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "spender": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "2000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x5c0bc6517b2f33aa02c1f424b686953d46394a1e231fdbc38da4b582e8481e13",
+              "blockNumber": 16,
+              "timestamp": 1793283401,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "2"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835401",
+                    "aprBpsAtOpen": "200"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x9a9a9285668354000f71238be4e88ae90efd8c15c893b8136c471ab07729e310",
+              "blockNumber": 17,
+              "timestamp": 1793283402,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "3"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "3",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835402",
+                    "aprBpsAtOpen": "200"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "scenario": "U02 early withdrawal pays principal less penalty and retains history",
+          "status": "passed",
+          "assertions": {
+            "depositId": "2",
+            "principal": "1000000000",
+            "penalty": "35000000",
+            "beforeBalance": "8000000000",
+            "afterBalance": "8965000000",
+            "feeReceiver": "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+            "feeBefore": "0",
+            "feeAfter": "35000000",
+            "vaultBefore": "5000000000",
+            "vaultAfter": "5000000000"
+          },
+          "transactions": [
+            {
+              "hash": "0xc017efd8520592768ee540f6c94c091eca6ee485ea88ab79c9f0383c34bb2f3b",
+              "blockNumber": 14,
+              "timestamp": 1793283408,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "spender": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xd9058262d263d2a1f0b2b61f26b35291982050c2bed7703156fc6ba6c7a99778",
+              "blockNumber": 15,
+              "timestamp": 1793283409,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "2"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835409",
+                    "aprBpsAtOpen": "200"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x74163e6cc360c0e7330dda8371bb66945ae1ad8d8fbc90cb8e25a6dfc2cea375",
+              "blockNumber": 16,
+              "timestamp": 1793283410,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "value": "965000000"
+                  }
+                },
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "to": "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+                    "value": "35000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Withdrawn",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "principal": "1000000000",
+                    "interest": "0",
+                    "isEarly": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "scenario": "U03 maturity settlement pays full principal plus exact interest",
+          "status": "passed",
+          "assertions": {
+            "depositId": "2",
+            "principal": "1000000000",
+            "interest": "9863013",
+            "payout": "1009863013",
+            "beforeBalance": "8000000000",
+            "afterBalance": "9009863013",
+            "vaultBefore": "5000000000",
+            "vaultAfter": "4990136987"
+          },
+          "transactions": [
+            {
+              "hash": "0xc017efd8520592768ee540f6c94c091eca6ee485ea88ab79c9f0383c34bb2f3b",
+              "blockNumber": 14,
+              "timestamp": 1793283414,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "spender": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xd9058262d263d2a1f0b2b61f26b35291982050c2bed7703156fc6ba6c7a99778",
+              "blockNumber": 15,
+              "timestamp": 1793283415,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "2"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835415",
+                    "aprBpsAtOpen": "200"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x432434c0990fae3fc1c04cc136625cd68ca1565c2b570e6009db92488b2fa7eb",
+              "blockNumber": 17,
+              "timestamp": 1808835416,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "9863013"
+                  }
+                },
+                {
+                  "contract": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                  "name": "InterestPaid",
+                  "args": {
+                    "savingCore": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "amount": "9863013"
+                  }
+                },
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "value": "1009863013"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Withdrawn",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "principal": "1000000000",
+                    "interest": "9863013",
+                    "isEarly": false
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "scenario": "U04 manual renewal compounds into plan 2 without approval",
+          "status": "passed",
+          "assertions": {
+            "predecessor": "2",
+            "successor": "3",
+            "principal": "1009863013",
+            "aprBps": 500,
+            "vaultBefore": "5000000000",
+            "vaultAfter": "4990136987",
+            "userBalanceUnchanged": "8000000000"
+          },
+          "transactions": [
+            {
+              "hash": "0xc017efd8520592768ee540f6c94c091eca6ee485ea88ab79c9f0383c34bb2f3b",
+              "blockNumber": 14,
+              "timestamp": 1793283423,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "spender": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xd9058262d263d2a1f0b2b61f26b35291982050c2bed7703156fc6ba6c7a99778",
+              "blockNumber": 15,
+              "timestamp": 1793283424,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "2"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835424",
+                    "aprBpsAtOpen": "200"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xb6562e34cc6623b89d637dc37926f291dd024d6f97c0fe6579e4684d1adb7ce2",
+              "blockNumber": 17,
+              "timestamp": 1808835425,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "9863013"
+                  }
+                },
+                {
+                  "contract": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                  "name": "InterestPaid",
+                  "args": {
+                    "savingCore": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "amount": "9863013"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "3"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "3",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "2",
+                    "principal": "1009863013",
+                    "maturityAt": "1839939425",
+                    "aprBpsAtOpen": "500"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Renewed",
+                  "args": {
+                    "oldDepositId": "2",
+                    "newDepositId": "3",
+                    "newPrincipal": "1009863013",
+                    "newPlanId": "2"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "scenario": "U05 auto renewal preserves snapshot terms after grace",
+          "status": "passed",
+          "assertions": {
+            "predecessor": "2",
+            "successor": "3",
+            "principal": "1009863013",
+            "aprBps": "200",
+            "penaltyBps": "350",
+            "tenorSeconds": "15552000",
+            "vaultBefore": "5000000000",
+            "vaultAfter": "4990136987"
+          },
+          "transactions": [
+            {
+              "hash": "0xc017efd8520592768ee540f6c94c091eca6ee485ea88ab79c9f0383c34bb2f3b",
+              "blockNumber": 14,
+              "timestamp": 1793283431,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "spender": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xd9058262d263d2a1f0b2b61f26b35291982050c2bed7703156fc6ba6c7a99778",
+              "blockNumber": 15,
+              "timestamp": 1793283432,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "2"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835432",
+                    "aprBpsAtOpen": "200"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x3f6c283fd04782d7e224b67dd9171f380536afa12ca3fa047d400414f6763769",
+              "blockNumber": 17,
+              "timestamp": 1809008233,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "9863013"
+                  }
+                },
+                {
+                  "contract": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                  "name": "InterestPaid",
+                  "args": {
+                    "savingCore": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "amount": "9863013"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "3"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "3",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1009863013",
+                    "maturityAt": "1824560233",
+                    "aprBpsAtOpen": "200"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Renewed",
+                  "args": {
+                    "oldDepositId": "2",
+                    "newDepositId": "3",
+                    "newPrincipal": "1009863013",
+                    "newPlanId": "1"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "scenario": "U06 Alice to Bob NFT ownership and admin access restriction",
+          "status": "passed",
+          "assertions": {
+            "depositId": "2",
+            "transferFixtureTx": "0xcd87c0fe13319e07fba752ffde9f3f8d6b65284a1cab2add6a6c807713542d50",
+            "owner": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+            "beforeBalance": "0",
+            "afterBalance": "965000000",
+            "userAdminRestricted": true
+          },
+          "transactions": [
+            {
+              "hash": "0xc017efd8520592768ee540f6c94c091eca6ee485ea88ab79c9f0383c34bb2f3b",
+              "blockNumber": 14,
+              "timestamp": 1793283471,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "spender": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xd9058262d263d2a1f0b2b61f26b35291982050c2bed7703156fc6ba6c7a99778",
+              "blockNumber": 15,
+              "timestamp": 1793283472,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "2"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835472",
+                    "aprBpsAtOpen": "200"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x85371fdf0614499f9073682b12ad00fdbff530ff55a67bd9d894482b3717fbde",
+              "blockNumber": 17,
+              "timestamp": 1793283474,
+              "from": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "to": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+                    "value": "965000000"
+                  }
+                },
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "to": "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+                    "value": "35000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Withdrawn",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+                    "principal": "1000000000",
+                    "interest": "0",
+                    "isEarly": true
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "run2",
+      "stats": {
+        "startTime": "2026-10-29T14:18:06.726Z",
+        "duration": 66007.851,
+        "expected": 9,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "contracts": {
+        "MockUSDC": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        "SavingCore": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+        "VaultManager": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+      },
+      "scenarios": [
+        {
+          "scenario": "A01 create, update, disable and enable plans with immutable deposit snapshots",
+          "status": "passed",
+          "assertions": {
+            "createdPlan": "4",
+            "existingDeposit": "2",
+            "snapshotAprBps": 200,
+            "newDeposit": "3",
+            "newAprBps": 300,
+            "reenabled": true
+          },
+          "transactions": [
+            {
+              "hash": "0xc017efd8520592768ee540f6c94c091eca6ee485ea88ab79c9f0383c34bb2f3b",
+              "blockNumber": 14,
+              "timestamp": 1793283563,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "spender": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xd9058262d263d2a1f0b2b61f26b35291982050c2bed7703156fc6ba6c7a99778",
+              "blockNumber": 15,
+              "timestamp": 1793283564,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "2"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835564",
+                    "aprBpsAtOpen": "200"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x9ca542d8d931be6b64777a73e5221a41454d3f9b1026ad2c524d394d280d6cb1",
+              "blockNumber": 16,
+              "timestamp": 1793283565,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "PlanCreated",
+                  "args": {
+                    "planId": "4",
+                    "tenorDays": "45",
+                    "aprBps": "600"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x4e50584228c8467b4cb53955aff10986f062b97b22a77c37f6bd17f8fb73cffb",
+              "blockNumber": 17,
+              "timestamp": 1793283566,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "PlanUpdated",
+                  "args": {
+                    "planId": "1",
+                    "newAprBps": "300"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x0714865c3a6d1599ff1819b4a0d83a95c5e6462ee4afd997128d5491295902aa",
+              "blockNumber": 18,
+              "timestamp": 1793283567,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "PlanEnabledChanged",
+                  "args": {
+                    "planId": "1",
+                    "enabled": false
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x37f77d70de36639783cbb5d64b7e77d29b041388fb7ab52bf0a00ed22a6447ac",
+              "blockNumber": 19,
+              "timestamp": 1793283568,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "PlanEnabledChanged",
+                  "args": {
+                    "planId": "1",
+                    "enabled": true
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x8a54e2ffd451a0fec643907fc6a89426a0de9cc14cdaabd41402dd6ad33d3e0e",
+              "blockNumber": 20,
+              "timestamp": 1793283569,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "spender": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xa0e96445f97a207059e61f69a05c2c8c33223b7f5d81b3a15d47bc511aece389",
+              "blockNumber": 21,
+              "timestamp": 1793283570,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "3"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "3",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835570",
+                    "aprBpsAtOpen": "300"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "scenario": "A02 admin mint, approve, fund vault and withdraw to admin",
+          "status": "passed",
+          "assertions": {
+            "adminBefore": "0",
+            "adminAfter": "4700000000",
+            "minted": "5000000000",
+            "funded": "500000000",
+            "withdrawn": "200000000",
+            "vaultBefore": "5000000000",
+            "vaultAfter": "5300000000",
+            "coreUnchanged": "1000000000"
+          },
+          "transactions": [
+            {
+              "hash": "0xe90bd677e565b5f4e9d250b4abd96f43ae8cf3a17ddf66f1938747af7bc58220",
+              "blockNumber": 14,
+              "timestamp": 1793283574,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                    "value": "5000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x50235d6c9800e8903a5fb45cddf799f85d4f473e07de7d72a32eb9177f3634a5",
+              "blockNumber": 15,
+              "timestamp": 1793283575,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                    "spender": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                    "value": "500000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x9c6700ad7d034a9e23fcc088a025974b670e4aab6aa0bfff9eb8f3b6783416d1",
+              "blockNumber": 16,
+              "timestamp": 1793283576,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                    "to": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                    "value": "500000000"
+                  }
+                },
+                {
+                  "contract": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                  "name": "VaultFunded",
+                  "args": {
+                    "admin": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                    "amount": "500000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x63289ac1f3091399cbaf6000f5695feefe044f9796522b1d7994f8481fd7c9fe",
+              "blockNumber": 17,
+              "timestamp": 1793283577,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                    "to": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                    "value": "200000000"
+                  }
+                },
+                {
+                  "contract": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                  "name": "VaultWithdrawn",
+                  "args": {
+                    "admin": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                    "amount": "200000000"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "scenario": "A03 fee receiver, pause blocks settlement, unpause recovers",
+          "status": "passed",
+          "assertions": {
+            "depositId": "2",
+            "receiver": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+            "receiverBefore": "0",
+            "receiverAfter": "35000000",
+            "pausedSettlementBlocked": true,
+            "recovered": true
+          },
+          "transactions": [
+            {
+              "hash": "0xc017efd8520592768ee540f6c94c091eca6ee485ea88ab79c9f0383c34bb2f3b",
+              "blockNumber": 14,
+              "timestamp": 1793283580,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "spender": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xd9058262d263d2a1f0b2b61f26b35291982050c2bed7703156fc6ba6c7a99778",
+              "blockNumber": 15,
+              "timestamp": 1793283581,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "2"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835581",
+                    "aprBpsAtOpen": "200"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x7f304018475e063a928404095f34562c30446fb2735d828a656af831476e025e",
+              "blockNumber": 16,
+              "timestamp": 1793283582,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                  "name": "FeeReceiverUpdated",
+                  "args": {
+                    "previousReceiver": "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+                    "newReceiver": "0x90F79bf6EB2c4f870365E785982E1f101E93b906"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x931e48479b18c428e7037fab4e507a6112e2ed7fe50f252cf6ef450599e458a2",
+              "blockNumber": 17,
+              "timestamp": 1793283583,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                  "name": "Paused",
+                  "args": {
+                    "account": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xe227635f23f1cb829ce18bd2d6696bf205697792bc6d110c2f09bce0edecfbf1",
+              "blockNumber": 18,
+              "timestamp": 1793283585,
+              "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+              "to": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                  "name": "Unpaused",
+                  "args": {
+                    "account": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x4e60c0bad5f1aacafb66a04dde0198a5ce8086934fa8e4ce374e5e5672ee01a9",
+              "blockNumber": 19,
+              "timestamp": 1793283586,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "value": "965000000"
+                  }
+                },
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "to": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+                    "value": "35000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Withdrawn",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "principal": "1000000000",
+                    "interest": "0",
+                    "isEarly": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "scenario": "U01 connect, faucet, approve, open and reuse allowance",
+          "status": "passed",
+          "assertions": {
+            "principalEach": "1000000000",
+            "count": 2,
+            "beforeBalance": "9000000000",
+            "afterBalance": "8000000000",
+            "allowance": "0"
+          },
+          "transactions": [
+            {
+              "hash": "0x6377d4e1702a4d8bb47a3a4504632111cf7b40061c480232cfb7af53bee72ce0",
+              "blockNumber": 14,
+              "timestamp": 1793283521,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "value": "1000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x70ef9198ee50dd9db99804bb5c4d8ef85f1a5053d801982d84cd2e7770528c0c",
+              "blockNumber": 15,
+              "timestamp": 1793283522,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "spender": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "2000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x5c0bc6517b2f33aa02c1f424b686953d46394a1e231fdbc38da4b582e8481e13",
+              "blockNumber": 16,
+              "timestamp": 1793283523,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "2"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835523",
+                    "aprBpsAtOpen": "200"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x9a9a9285668354000f71238be4e88ae90efd8c15c893b8136c471ab07729e310",
+              "blockNumber": 17,
+              "timestamp": 1793283524,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "3"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "3",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835524",
+                    "aprBpsAtOpen": "200"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "scenario": "U02 early withdrawal pays principal less penalty and retains history",
+          "status": "passed",
+          "assertions": {
+            "depositId": "2",
+            "principal": "1000000000",
+            "penalty": "35000000",
+            "beforeBalance": "8000000000",
+            "afterBalance": "8965000000",
+            "feeReceiver": "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+            "feeBefore": "0",
+            "feeAfter": "35000000",
+            "vaultBefore": "5000000000",
+            "vaultAfter": "5000000000"
+          },
+          "transactions": [
+            {
+              "hash": "0xc017efd8520592768ee540f6c94c091eca6ee485ea88ab79c9f0383c34bb2f3b",
+              "blockNumber": 14,
+              "timestamp": 1793283530,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "spender": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xd9058262d263d2a1f0b2b61f26b35291982050c2bed7703156fc6ba6c7a99778",
+              "blockNumber": 15,
+              "timestamp": 1793283531,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "2"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835531",
+                    "aprBpsAtOpen": "200"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x74163e6cc360c0e7330dda8371bb66945ae1ad8d8fbc90cb8e25a6dfc2cea375",
+              "blockNumber": 16,
+              "timestamp": 1793283532,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "value": "965000000"
+                  }
+                },
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "to": "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+                    "value": "35000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Withdrawn",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "principal": "1000000000",
+                    "interest": "0",
+                    "isEarly": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "scenario": "U03 maturity settlement pays full principal plus exact interest",
+          "status": "passed",
+          "assertions": {
+            "depositId": "2",
+            "principal": "1000000000",
+            "interest": "9863013",
+            "payout": "1009863013",
+            "beforeBalance": "8000000000",
+            "afterBalance": "9009863013",
+            "vaultBefore": "5000000000",
+            "vaultAfter": "4990136987"
+          },
+          "transactions": [
+            {
+              "hash": "0xc017efd8520592768ee540f6c94c091eca6ee485ea88ab79c9f0383c34bb2f3b",
+              "blockNumber": 14,
+              "timestamp": 1793283537,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "spender": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xd9058262d263d2a1f0b2b61f26b35291982050c2bed7703156fc6ba6c7a99778",
+              "blockNumber": 15,
+              "timestamp": 1793283538,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "2"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835538",
+                    "aprBpsAtOpen": "200"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x432434c0990fae3fc1c04cc136625cd68ca1565c2b570e6009db92488b2fa7eb",
+              "blockNumber": 17,
+              "timestamp": 1808835539,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "9863013"
+                  }
+                },
+                {
+                  "contract": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                  "name": "InterestPaid",
+                  "args": {
+                    "savingCore": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "amount": "9863013"
+                  }
+                },
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "value": "1009863013"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Withdrawn",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "principal": "1000000000",
+                    "interest": "9863013",
+                    "isEarly": false
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "scenario": "U04 manual renewal compounds into plan 2 without approval",
+          "status": "passed",
+          "assertions": {
+            "predecessor": "2",
+            "successor": "3",
+            "principal": "1009863013",
+            "aprBps": 500,
+            "vaultBefore": "5000000000",
+            "vaultAfter": "4990136987",
+            "userBalanceUnchanged": "8000000000"
+          },
+          "transactions": [
+            {
+              "hash": "0xc017efd8520592768ee540f6c94c091eca6ee485ea88ab79c9f0383c34bb2f3b",
+              "blockNumber": 14,
+              "timestamp": 1793283546,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "spender": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xd9058262d263d2a1f0b2b61f26b35291982050c2bed7703156fc6ba6c7a99778",
+              "blockNumber": 15,
+              "timestamp": 1793283547,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "2"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835547",
+                    "aprBpsAtOpen": "200"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xb6562e34cc6623b89d637dc37926f291dd024d6f97c0fe6579e4684d1adb7ce2",
+              "blockNumber": 17,
+              "timestamp": 1808835548,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "9863013"
+                  }
+                },
+                {
+                  "contract": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                  "name": "InterestPaid",
+                  "args": {
+                    "savingCore": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "amount": "9863013"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "3"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "3",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "2",
+                    "principal": "1009863013",
+                    "maturityAt": "1839939548",
+                    "aprBpsAtOpen": "500"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Renewed",
+                  "args": {
+                    "oldDepositId": "2",
+                    "newDepositId": "3",
+                    "newPrincipal": "1009863013",
+                    "newPlanId": "2"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "scenario": "U05 auto renewal preserves snapshot terms after grace",
+          "status": "passed",
+          "assertions": {
+            "predecessor": "2",
+            "successor": "3",
+            "principal": "1009863013",
+            "aprBps": "200",
+            "penaltyBps": "350",
+            "tenorSeconds": "15552000",
+            "vaultBefore": "5000000000",
+            "vaultAfter": "4990136987"
+          },
+          "transactions": [
+            {
+              "hash": "0xc017efd8520592768ee540f6c94c091eca6ee485ea88ab79c9f0383c34bb2f3b",
+              "blockNumber": 14,
+              "timestamp": 1793283554,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "spender": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xd9058262d263d2a1f0b2b61f26b35291982050c2bed7703156fc6ba6c7a99778",
+              "blockNumber": 15,
+              "timestamp": 1793283555,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "2"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835555",
+                    "aprBpsAtOpen": "200"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x3f6c283fd04782d7e224b67dd9171f380536afa12ca3fa047d400414f6763769",
+              "blockNumber": 17,
+              "timestamp": 1809008356,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "9863013"
+                  }
+                },
+                {
+                  "contract": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                  "name": "InterestPaid",
+                  "args": {
+                    "savingCore": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "amount": "9863013"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "3"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "3",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1009863013",
+                    "maturityAt": "1824560356",
+                    "aprBpsAtOpen": "200"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Renewed",
+                  "args": {
+                    "oldDepositId": "2",
+                    "newDepositId": "3",
+                    "newPrincipal": "1009863013",
+                    "newPlanId": "1"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "scenario": "U06 Alice to Bob NFT ownership and admin access restriction",
+          "status": "passed",
+          "assertions": {
+            "depositId": "2",
+            "transferFixtureTx": "0xcd87c0fe13319e07fba752ffde9f3f8d6b65284a1cab2add6a6c807713542d50",
+            "owner": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+            "beforeBalance": "0",
+            "afterBalance": "965000000",
+            "userAdminRestricted": true
+          },
+          "transactions": [
+            {
+              "hash": "0xc017efd8520592768ee540f6c94c091eca6ee485ea88ab79c9f0383c34bb2f3b",
+              "blockNumber": 14,
+              "timestamp": 1793283598,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Approval",
+                  "args": {
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "spender": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0xd9058262d263d2a1f0b2b61f26b35291982050c2bed7703156fc6ba6c7a99778",
+              "blockNumber": 15,
+              "timestamp": 1793283599,
+              "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "value": "1000000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x0000000000000000000000000000000000000000",
+                    "to": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "tokenId": "2"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "DepositOpened",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                    "planId": "1",
+                    "principal": "1000000000",
+                    "maturityAt": "1808835599",
+                    "aprBpsAtOpen": "200"
+                  }
+                }
+              ]
+            },
+            {
+              "hash": "0x85371fdf0614499f9073682b12ad00fdbff530ff55a67bd9d894482b3717fbde",
+              "blockNumber": 17,
+              "timestamp": 1793283602,
+              "from": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+              "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+              "status": 1,
+              "events": [
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "to": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+                    "value": "965000000"
+                  }
+                },
+                {
+                  "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                  "name": "Transfer",
+                  "args": {
+                    "from": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                    "to": "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+                    "value": "35000000"
+                  }
+                },
+                {
+                  "contract": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                  "name": "Withdrawn",
+                  "args": {
+                    "depositId": "2",
+                    "owner": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+                    "principal": "1000000000",
+                    "interest": "0",
+                    "isEarly": true
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 import React from "react";
 import { DepositStatus, type DepositRecord } from "../../types";
-import { formatBps, formatTimestamp, shortenAddress } from "../../lib/format";
+import { formatDurationSeconds, formatBps, formatTimestamp, shortenAddress } from "../../lib/format";
 
 interface DepositCardProps {
   deposit: DepositRecord;
@@ -96,7 +96,7 @@ export const DepositCard: React.FC<DepositCardProps> = ({
           <div className="spec-item">
             <span className="spec-label">Tenor Term</span>
             <span className="spec-value tabular-num">
-              {(deposit.tenorSeconds / 86400).toFixed(0)} days
+              {formatDurationSeconds(deposit.tenorSeconds)}
             </span>
           </div>
 

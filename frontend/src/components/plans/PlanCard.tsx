@@ -1,6 +1,6 @@
 import React from "react";
 import type { SavingPlan } from "../../types";
-import { formatDurationDays } from "../../lib/format";
+import { formatDurationSeconds } from "../../lib/format";
 
 interface PlanCardProps {
   plan: SavingPlan;
@@ -22,7 +22,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
           <div>
             <h3 className="plan-title">Plan #{plan.planId}</h3>
             <div style={{ fontSize: "14px", color: "var(--color-muted)" }}>
-              {formatDurationDays(plan.tenorDays)}
+              {formatDurationSeconds(plan.tenorSeconds)}
             </div>
           </div>
           <span className={`plan-badge ${plan.enabled ? "active" : "inactive"}`}>
@@ -38,7 +38,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
         <div className="plan-meta-list">
           <div className="plan-meta-item">
             <span className="meta-label">Tenor Period</span>
-            <span className="meta-value tabular-num">{plan.tenorDays} days</span>
+            <span className="meta-value tabular-num">{formatDurationSeconds(plan.tenorSeconds)}</span>
           </div>
           <div className="plan-meta-item">
             <span className="meta-label">Early Penalty</span>

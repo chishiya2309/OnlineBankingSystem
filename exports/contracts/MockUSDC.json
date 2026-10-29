@@ -1,10 +1,10 @@
 {
   "contractName": "MockUSDC",
-  "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-  "deploymentTxHash": "0x61e2b6d344c0bfcb635c528dc18026a79ca3b49d6c3bf3f7361e18d4c757ff50",
-  "blockNumber": 1,
-  "network": "localhost",
-  "chainId": 31337,
+  "address": "0x578d4C3f5A95a6797aD8445487062b6469768a58",
+  "deploymentTxHash": "0xd996bddbcc4ba5306c571b4ede516eadb71704371264eaf51c85e2fe910262c7",
+  "blockNumber": 12011057,
+  "network": "sepolia",
+  "chainId": 11155111,
   "abi": [
     {
       "inputs": [],

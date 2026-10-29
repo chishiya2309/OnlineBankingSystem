@@ -6,6 +6,7 @@ describe("Deposit Flow Business Logic & Traceability (FE-003 to FE-015)", () => 
   const sampleEnabledPlan: SavingPlan = {
     planId: 1,
     tenorDays: 180,
+    tenorSeconds: 180 * 86400,
     aprBps: 200,
     aprPercent: "2.00%",
     minDeposit: 100000000n, // 100 USDC

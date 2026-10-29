@@ -1,4 +1,5 @@
 import { network } from "hardhat";
+import assert from "node:assert/strict";
 import { ethers } from "ethers";
 import { readManifest } from "./helpers/deployment-manifest.js";
 
@@ -51,6 +52,7 @@ async function main() {
   const approveTx = await mockUSDC.approve(coreAddr, depositAmount);
   console.log(`Approval Tx Submitted: ${approveTx.hash}`);
   const approveReceipt = await approveTx.wait();
+  assert(approveReceipt, "Approval receipt must be mined");
   console.log(`Approval Confirmed in Block: ${approveReceipt.blockNumber}, Status: ${approveReceipt.status}`);
 
   const postApproveAllowance: bigint = BigInt(await mockUSDC.allowance(depositor.address, coreAddr));
@@ -61,6 +63,7 @@ async function main() {
   const openTx = await core.openDeposit(1, depositAmount);
   console.log(`OpenDeposit Tx Submitted: ${openTx.hash}`);
   const openReceipt = await openTx.wait();
+  assert(openReceipt, "Deposit receipt must be mined");
   console.log(`OpenDeposit Confirmed in Block: ${openReceipt.blockNumber}, Status: ${openReceipt.status}`);
 
   // Step 5: Parse DepositOpened Event

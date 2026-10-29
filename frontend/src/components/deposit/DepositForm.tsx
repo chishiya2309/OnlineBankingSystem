@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import type { SavingPlan, DepositFlowStatus } from "../../types";
-import { formatUSDC, parseUSDC, formatDurationDays } from "../../lib/format";
-import { calculateContractualInterest } from "../../lib/financials";
+import { formatUSDC, parseUSDC, formatDurationSeconds } from "../../lib/format";
+import { calculateInterestFromSeconds } from "../../lib/financials";
 
 interface DepositFormProps {
   selectedPlan: SavingPlan | null;
@@ -39,10 +39,10 @@ export const DepositForm: React.FC<DepositFormProps> = ({
 
   const estimatedInterest = useMemo(() => {
     if (!selectedPlan || parsedAmount <= 0n) return 0n;
-    return calculateContractualInterest(
+    return calculateInterestFromSeconds(
       parsedAmount,
       selectedPlan.aprBps,
-      selectedPlan.tenorDays
+      selectedPlan.tenorSeconds
     );
   }, [selectedPlan, parsedAmount]);
 
@@ -137,7 +137,7 @@ export const DepositForm: React.FC<DepositFormProps> = ({
               </span>
             </div>
             <div style={{ fontSize: "13px", color: "var(--color-muted)" }}>
-              Tenor: {formatDurationDays(selectedPlan.tenorDays)}, Early Penalty: {selectedPlan.penaltyPercent}
+              Tenor: {formatDurationSeconds(selectedPlan.tenorSeconds)}, Early Penalty: {selectedPlan.penaltyPercent}
             </div>
           </div>
 
@@ -190,18 +190,18 @@ export const DepositForm: React.FC<DepositFormProps> = ({
             </div>
             <div className="summary-row">
               <span className="meta-label">Tenor Duration</span>
-              <span className="meta-value tabular-num">{selectedPlan.tenorDays} days</span>
+              <span className="meta-value tabular-num">{formatDurationSeconds(selectedPlan.tenorSeconds)}</span>
             </div>
             <div className="summary-row">
               <span className="meta-label">Estimated Contractual Interest</span>
               <span className="meta-value tabular-num summary-highlight">
-                +{formatUSDC(estimatedInterest)} USDC
+                +{formatUSDC(estimatedInterest, selectedPlan.tenorSeconds < 86400 ? 6 : 2)} USDC
               </span>
             </div>
             <div className="summary-row">
               <span className="meta-label">Total Projected Payout</span>
               <span className="meta-value tabular-num">
-                {formatUSDC(totalEstimatedPayout)} USDC
+                {formatUSDC(totalEstimatedPayout, selectedPlan.tenorSeconds < 86400 ? 6 : 2)} USDC
               </span>
             </div>
           </div>

@@ -1,4 +1,4 @@
-// Reserved for deployment scripts and business-contract fixtures in later tasks.
+// Personal Variant used by deployment, seed scripts and business-contract fixtures.
 export const personalVariant = {
   studentIdSuffix: "10",
   A: 0,

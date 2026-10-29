@@ -11,7 +11,7 @@ import {IVaultManager} from "./interfaces/IVaultManager.sol";
 /// @title SavingCore
 /// @notice Core term deposit engine holding principal, managing plans, and issuing deposit NFTs.
 /// @dev Supports the standard MockUSDC asset; fee-on-transfer and rebasing assets are unsupported.
-/// Withdrawal and renewal workflows are implemented in subsequent tasks.
+/// Deposit terms are snapshotted at opening and cannot be rewritten by administrators.
 contract SavingCore is ERC721, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
@@ -28,6 +28,7 @@ contract SavingCore is ERC721, ReentrancyGuard {
 
     /// @notice Term deposit plan specification.
     struct SavingPlan {
+        // Whole-day component for legacy clients. planDurationSeconds is authoritative.
         uint32 tenorDays;
         uint16 aprBps;
         uint256 minDeposit;
@@ -67,6 +68,8 @@ contract SavingCore is ERC721, ReentrancyGuard {
 
     /// @dev Internal mapping from plan ID to SavingPlan struct.
     mapping(uint256 => SavingPlan) private _plans;
+    /// @notice Exact duration set once at plan creation; zero for nonexistent plan IDs.
+    mapping(uint256 => uint256) public planDurationSeconds;
     mapping(uint256 => Deposit) private _deposits;
 
     // --- Custom Errors ---
@@ -75,6 +78,7 @@ contract SavingCore is ERC721, ReentrancyGuard {
     error InvalidGracePeriod(uint256 secondsValue);
     error NotBankAdmin(address caller);
     error InvalidTenor(uint256 tenorDays);
+    error InvalidTenorSeconds(uint256 tenorSeconds);
     error InvalidApr(uint256 aprBps);
     error InvalidPenalty(uint256 penaltyBps);
     error InvalidDepositLimits(uint256 minDeposit, uint256 maxDeposit);
@@ -90,19 +94,13 @@ contract SavingCore is ERC721, ReentrancyGuard {
     error DepositNotMatured(uint256 depositId, uint256 maturityAt);
     error EarlyWithdrawalClosed(uint256 depositId, uint256 maturityAt);
     error GracePeriodNotEnded(uint256 depositId, uint256 graceEnd);
-    error InvalidDepositTimeline(uint256 newStartAt, uint256 newMaturityAt);
 
     // --- Events ---
     event PlanCreated(uint256 indexed planId, uint256 tenorDays, uint256 aprBps);
+    /// @notice Exact duration; PlanCreated.tenorDays is the whole-day component only.
+    event PlanDurationSet(uint256 indexed planId, uint256 tenorSeconds);
     event PlanUpdated(uint256 indexed planId, uint256 newAprBps);
     event PlanEnabledChanged(uint256 indexed planId, bool enabled);
-    event DepositTimelineUpdated(
-        uint256 indexed depositId,
-        uint256 oldStartAt,
-        uint256 oldMaturityAt,
-        uint256 newStartAt,
-        uint256 newMaturityAt
-    );
     event DepositOpened(
         uint256 indexed depositId,
         address indexed owner,
@@ -173,6 +171,33 @@ contract SavingCore is ERC721, ReentrancyGuard {
         bool enabled
     ) external onlyBankAdmin returns (uint256 planId) {
         if (tenorDays == 0 || tenorDays > type(uint32).max) revert InvalidTenor(tenorDays);
+        return _createPlan(tenorDays * SECONDS_PER_DAY, aprBps, minDeposit, maxDeposit, penaltyBps, enabled);
+    }
+
+    /// @notice Creates a plan with an exact positive duration, including sub-day terms.
+    /// @dev Preserves the same maximum duration as createPlan. APR remains annualized.
+    function createPlanSeconds(
+        uint256 tenorSeconds,
+        uint256 aprBps,
+        uint256 minDeposit,
+        uint256 maxDeposit,
+        uint256 penaltyBps,
+        bool enabled
+    ) external onlyBankAdmin returns (uint256 planId) {
+        return _createPlan(tenorSeconds, aprBps, minDeposit, maxDeposit, penaltyBps, enabled);
+    }
+
+    function _createPlan(
+        uint256 tenorSeconds,
+        uint256 aprBps,
+        uint256 minDeposit,
+        uint256 maxDeposit,
+        uint256 penaltyBps,
+        bool enabled
+    ) internal returns (uint256 planId) {
+        if (tenorSeconds == 0 || tenorSeconds > uint256(type(uint32).max) * SECONDS_PER_DAY) {
+            revert InvalidTenorSeconds(tenorSeconds);
+        }
         if (aprBps > 10000) revert InvalidApr(aprBps);
         if (penaltyBps > 10000) revert InvalidPenalty(penaltyBps);
         if (minDeposit != 0 && maxDeposit != 0 && minDeposit > maxDeposit) {
@@ -181,7 +206,7 @@ contract SavingCore is ERC721, ReentrancyGuard {
 
         planId = ++planCount;
         _plans[planId] = SavingPlan({
-            tenorDays: uint32(tenorDays),
+            tenorDays: uint32(tenorSeconds / SECONDS_PER_DAY),
             aprBps: uint16(aprBps),
             minDeposit: minDeposit,
             maxDeposit: maxDeposit,
@@ -189,7 +214,9 @@ contract SavingCore is ERC721, ReentrancyGuard {
             enabled: enabled
         });
 
-        emit PlanCreated(planId, tenorDays, aprBps);
+        planDurationSeconds[planId] = tenorSeconds;
+        emit PlanCreated(planId, tenorSeconds / SECONDS_PER_DAY, aprBps);
+        emit PlanDurationSet(planId, tenorSeconds);
     }
 
     /// @notice Returns full details of an existing saving plan.
@@ -249,7 +276,7 @@ contract SavingCore is ERC721, ReentrancyGuard {
         }
 
         uint256 startAt = block.timestamp;
-        uint256 tenorSeconds = uint256(plan.tenorDays) * SECONDS_PER_DAY;
+        uint256 tenorSeconds = planDurationSeconds[planId];
         uint256 maturityAt = startAt + tenorSeconds;
         // Reject terms whose eventual full-term interest or payout cannot fit in uint256.
         _fullTermPayout(amount, plan.aprBps, tenorSeconds);
@@ -277,35 +304,6 @@ contract SavingCore is ERC721, ReentrancyGuard {
     function getDeposit(uint256 depositId) external view returns (Deposit memory) {
         if (depositId == 0 || depositId > depositCount) revert DepositNotFound(depositId);
         return _deposits[depositId];
-    }
-
-    /// @notice Allows the Bank Admin to adjust startAt and maturityAt of an Active deposit.
-    /// @dev Specifically provided for testnet verification (e.g., Sepolia) and administrative lifecycle testing.
-    /// @param depositId ID of the active deposit to update.
-    /// @param newStartAt New starting timestamp.
-    /// @param newMaturityAt New maturity timestamp (must be strictly greater than newStartAt).
-    function setDepositTimeline(
-        uint256 depositId,
-        uint256 newStartAt,
-        uint256 newMaturityAt
-    ) external onlyBankAdmin {
-        if (depositId == 0 || depositId > depositCount) revert DepositNotFound(depositId);
-
-        Deposit storage deposit = _deposits[depositId];
-        if (deposit.status != DepositStatus.Active) {
-            revert DepositNotActive(depositId, deposit.status);
-        }
-        if (newMaturityAt <= newStartAt) {
-            revert InvalidDepositTimeline(newStartAt, newMaturityAt);
-        }
-
-        uint256 oldStartAt = deposit.startAt;
-        uint256 oldMaturityAt = deposit.maturityAt;
-
-        deposit.startAt = newStartAt;
-        deposit.maturityAt = newMaturityAt;
-
-        emit DepositTimelineUpdated(depositId, oldStartAt, oldMaturityAt, newStartAt, newMaturityAt);
     }
 
     /// @notice Calculates the full-term contractual interest for a deposit based on its open snapshot.
@@ -447,7 +445,7 @@ contract SavingCore is ERC721, ReentrancyGuard {
         }
 
         uint256 startAt = block.timestamp;
-        uint256 targetTenorSeconds = uint256(targetPlan.tenorDays) * SECONDS_PER_DAY;
+        uint256 targetTenorSeconds = planDurationSeconds[newPlanId];
         uint256 maturityAt = startAt + targetTenorSeconds;
         _fullTermPayout(newPrincipal, targetPlan.aprBps, targetTenorSeconds);
 

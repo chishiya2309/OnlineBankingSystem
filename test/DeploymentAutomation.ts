@@ -259,5 +259,38 @@ describe("Deployment Automation & Verification (DEP-001 to DEP-016)", function (
       const report = await verifyDeployment({ networkName: "hardhatMainnet", connection });
       expect(report.allPassed).to.be.true;
     });
+
+    it("DEP-017: rejects a Core missing the new API and force-deploys fresh Vault/Core without migrating old deposits", async function () {
+      const previous = await readManifest("hardhatMainnet");
+      try {
+        const initial = await deployContracts({ networkName: "hardhatMainnet", connection, forceRedeploy: true });
+        const seeded = await seedContracts({ networkName: "hardhatMainnet", connection, manifest: initial.manifest });
+        const old = initial.contracts.savingCore;
+        const oldDeposit = await old.getDeposit(1);
+        const oldPrincipalBalance = await initial.contracts.mockUSDC.balanceOf(await old.getAddress());
+        // A live contract without planDurationSeconds represents the missing API on legacy Core.
+        const legacy = await ethers.deployContract("Counter");
+        await legacy.waitForDeployment();
+        await saveManifest({ ...seeded.manifest, contracts: {
+          ...seeded.manifest.contracts,
+          SavingCore: { address: await legacy.getAddress(), deploymentTxHash: legacy.deploymentTransaction()!.hash },
+        } });
+        let errorMessage = "";
+        try { await deployContracts({ networkName: "hardhatMainnet", connection }); }
+        catch (error) { errorMessage = String(error); }
+        expect(errorMessage).to.include("LEGACY_CORE_REQUIRES_REDEPLOY");
+        const fresh = await deployContracts({ networkName: "hardhatMainnet", connection, forceRedeploy: true });
+        expect(fresh.manifest.contracts.MockUSDC.address).to.equal(seeded.manifest.contracts.MockUSDC.address);
+        expect(fresh.manifest.contracts.VaultManager.address).to.not.equal(seeded.manifest.contracts.VaultManager.address);
+        expect(fresh.manifest.contracts.SavingCore.address).to.not.equal(seeded.manifest.contracts.SavingCore.address);
+        expect(await fresh.contracts.vaultManager.savingCore()).to.equal(fresh.manifest.contracts.SavingCore.address);
+        expect(await fresh.contracts.savingCore.planDurationSeconds(0)).to.equal(0n);
+        expect(await fresh.contracts.savingCore.depositCount()).to.equal(0n);
+        expect(await old.getDeposit(1)).to.deep.equal(oldDeposit);
+        expect(await initial.contracts.mockUSDC.balanceOf(await old.getAddress())).to.equal(oldPrincipalBalance);
+      } finally {
+        if (previous) await saveManifest(previous);
+      }
+    });
   });
 });

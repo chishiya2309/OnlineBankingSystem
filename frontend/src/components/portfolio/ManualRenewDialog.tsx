@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import type { DepositRecord, SavingPlan } from "../../types";
 import type { UseRenewalState } from "../../hooks/useRenewal";
-import { formatUSDC, shortenAddress } from "../../lib/format";
+import { formatDurationSeconds, formatUSDC, shortenAddress } from "../../lib/format";
 
 interface ManualRenewDialogProps {
   deposit: DepositRecord | null;
@@ -28,10 +28,10 @@ export const ManualRenewDialog: React.FC<ManualRenewDialogProps> = ({
   } = renewalState;
 
   const compoundedPrincipal = deposit.principal + deposit.accruedInterest;
-  const compoundedFormatted = formatUSDC(compoundedPrincipal);
+  const compoundedFormatted = formatUSDC(compoundedPrincipal, deposit.tenorSeconds < 86400 ? 6 : 2);
 
   // Filter plans to enabled ones
-  const availablePlans = savingPlans.filter((p) => p.enabled);
+  const availablePlans = useMemo(() => savingPlans.filter((p) => p.enabled), [savingPlans]);
 
   const [selectedPlanId, setSelectedPlanId] = useState<number>(
     availablePlans[0]?.planId || 1
@@ -47,9 +47,14 @@ export const ManualRenewDialog: React.FC<ManualRenewDialogProps> = ({
         const meetsMax = p.maxDeposit === 0n || compoundedPrincipal <= p.maxDeposit;
         return meetsMin && meetsMax;
       });
-      if (eligible) {
-        setSelectedPlanId(eligible.planId);
-      }
+      setSelectedPlanId((current) => {
+        const selected = availablePlans.find((p) => p.planId === current);
+        if (selected && (selected.minDeposit === 0n || compoundedPrincipal >= selected.minDeposit)
+          && (selected.maxDeposit === 0n || compoundedPrincipal <= selected.maxDeposit)) return current;
+        return eligible?.planId ?? 0;
+      });
+    } else {
+      setSelectedPlanId(0);
     }
   }, [compoundedPrincipal, availablePlans]);
 
@@ -225,7 +230,7 @@ export const ManualRenewDialog: React.FC<ManualRenewDialogProps> = ({
                             {plan.aprPercent} APR
                           </span>
                           <span style={{ fontSize: "13px", color: "var(--color-muted)" }}>
-                            ({plan.tenorDays} days)
+                            ({formatDurationSeconds(plan.tenorSeconds)})
                           </span>
                         </div>
                         <div style={{ fontSize: "12px", color: "var(--color-muted)", marginTop: "4px" }}>

@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import path from "node:path";
 import { network } from "hardhat";
+import { readManifest } from "../helpers/deployment-manifest.js";
 
 async function main() {
   console.log("================================================================");
@@ -10,12 +9,12 @@ async function main() {
 
   const connection = await network.create("localhost");
   const { ethers } = connection;
+  assert.equal((await ethers.provider.getNetwork()).chainId, 31337n, "Admin demo is restricted to local Hardhat");
   const signers = await ethers.getSigners();
   const bankAdmin = signers[1]; // 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
 
-  const manifestPath = path.resolve(process.cwd(), "deployments/localhost.json");
-  assert(fs.existsSync(manifestPath), "Manifest for localhost must exist");
-  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  const manifest = await readManifest("localhost");
+  assert(manifest, "Manifest for localhost must exist");
 
   const core = await ethers.getContractAt("SavingCore", manifest.contracts.SavingCore.address, bankAdmin);
   const vault = await ethers.getContractAt("VaultManager", manifest.contracts.VaultManager.address, bankAdmin);
@@ -33,6 +32,7 @@ async function main() {
   console.log("Creating new 45-day admin plan...");
   const createTx = await core.createPlan(45, 600, 0, 0, 400, true);
   const createReceipt = await createTx.wait();
+  assert(createReceipt, "Plan creation receipt must be mined");
   console.log(`Plan created in block ${createReceipt.blockNumber}, txHash: ${createReceipt.hash}`);
 
   const planCountAfter = await core.planCount();

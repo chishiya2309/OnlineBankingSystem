@@ -5,7 +5,7 @@ export const SUPPORTED_NETWORKS: Record<number, NetworkConfig> = {
     chainId: 31337,
     name: "localhost",
     displayName: "Hardhat Localhost",
-    rpcUrl: "http://127.0.0.1:8545",
+    rpcUrl: import.meta.env.VITE_LOCAL_RPC_URL || "http://127.0.0.1:8545",
     currencySymbol: "ETH",
     isTestnet: true,
   },

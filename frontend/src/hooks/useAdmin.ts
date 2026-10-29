@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { ethers } from "ethers";
 import type { AdminSummary, CreatePlanInput, AdminActionStatus, ConfirmedAdminResult } from "../types";
-import { formatUSDC } from "../lib/format";
+import { formatUSDC, formatDurationSeconds } from "../lib/format";
 import { parseTransactionError } from "../lib/errors";
 
 const INITIAL_SUMMARY: AdminSummary = {
   isBankAdmin: false,
+  supportsSecondPlans: false,
   vaultOwner: null,
   isPaused: false,
   feeReceiver: null,
@@ -42,7 +43,7 @@ export function useAdmin(
 
       const vaultAddress = vaultManager.target ? await vaultManager.getAddress() : "";
 
-      const [vaultOwner, isPaused, feeReceiver, rawVaultBal, rawAdminBal, rawAllowance] =
+      const [vaultOwner, isPaused, feeReceiver, rawVaultBal, rawAdminBal, rawAllowance, supportsSecondPlans] =
         await Promise.all([
           vaultManager.owner().catch(() => null),
           vaultManager.paused().catch(() => false),
@@ -50,6 +51,7 @@ export function useAdmin(
           vaultAddress ? mockUSDC.balanceOf(vaultAddress).catch(() => 0n) : 0n,
           account ? mockUSDC.balanceOf(account).catch(() => 0n) : 0n,
           account && vaultAddress ? mockUSDC.allowance(account, vaultAddress).catch(() => 0n) : 0n,
+          savingCore.planDurationSeconds(0).then(() => true).catch(() => false),
         ]);
 
       const isBankAdmin = Boolean(
@@ -60,6 +62,7 @@ export function useAdmin(
 
       setSummary({
         isBankAdmin,
+        supportsSecondPlans,
         vaultOwner,
         isPaused: Boolean(isPaused),
         feeReceiver,
@@ -89,12 +92,12 @@ export function useAdmin(
         return false;
       }
 
-      if (input.tenorDays <= 0) {
-        setError("Tenor must be at least 1 day.");
+      if (!Number.isSafeInteger(input.tenorSeconds) || input.tenorSeconds < 1 || input.tenorSeconds > 4294967295 * 86400) {
+        setError("Tenor must be a positive whole number of seconds within the supported maximum.");
         return false;
       }
-      if (input.aprBps <= 0 || input.aprBps > 10000) {
-        setError("APR must be between 1 and 10,000 basis points (0.01% - 100.00%).");
+      if (input.aprBps < 0 || input.aprBps > 10000) {
+        setError("APR must be between 0 and 10,000 basis points (0.00% - 100.00%).");
         return false;
       }
       if (input.earlyWithdrawPenaltyBps < 0 || input.earlyWithdrawPenaltyBps > 10000) {
@@ -109,8 +112,10 @@ export function useAdmin(
         const minDeposit = input.minDeposit ? ethers.parseUnits(input.minDeposit, 6) : 0n;
         const maxDeposit = input.maxDeposit ? ethers.parseUnits(input.maxDeposit, 6) : 0n;
 
-        const tx = await savingCore.createPlan(
-          BigInt(input.tenorDays),
+        const wholeDays = input.tenorSeconds % 86400 === 0;
+        if (!wholeDays && !summary.supportsSecondPlans) throw new Error("This legacy SavingCore must be redeployed to support short plans.");
+        const tx = await savingCore[wholeDays ? "createPlan" : "createPlanSeconds"](
+          BigInt(wholeDays ? input.tenorSeconds / 86400 : input.tenorSeconds),
           BigInt(input.aprBps),
           minDeposit,
           maxDeposit,
@@ -125,7 +130,7 @@ export function useAdmin(
         setLatestResult({
           action: "Plan Created",
           txHash: receipt.hash,
-          details: `Created ${input.tenorDays}d plan with ${(input.aprBps / 100).toFixed(2)}% APR.`,
+          details: `Created ${formatDurationSeconds(input.tenorSeconds)} plan with ${(input.aprBps / 100).toFixed(2)}% APR.`,
           blockNumber: receipt.blockNumber,
         });
 
@@ -139,7 +144,7 @@ export function useAdmin(
         return false;
       }
     },
-    [savingCore, account, fetchAdminData, onSuccessCallback]
+    [savingCore, account, fetchAdminData, onSuccessCallback, summary.supportsSecondPlans]
   );
 
   // 2. Update Plan APR
@@ -150,8 +155,8 @@ export function useAdmin(
         return false;
       }
 
-      if (newAprBps <= 0 || newAprBps > 10000) {
-        setError("APR must be between 1 and 10,000 basis points.");
+      if (newAprBps < 0 || newAprBps > 10000) {
+        setError("APR must be between 0 and 10,000 basis points.");
         return false;
       }
 
@@ -181,7 +186,7 @@ export function useAdmin(
         return false;
       }
     },
-    [savingCore, account, fetchAdminData, onSuccessCallback]
+    [savingCore, account, fetchAdminData, onSuccessCallback, summary.supportsSecondPlans]
   );
 
   // 3. Toggle Plan Status (Enable / Disable)
@@ -221,7 +226,7 @@ export function useAdmin(
         return false;
       }
     },
-    [savingCore, account, fetchAdminData, onSuccessCallback]
+    [savingCore, account, fetchAdminData, onSuccessCallback, summary.supportsSecondPlans]
   );
 
   // 4. Fund Vault
@@ -282,7 +287,7 @@ export function useAdmin(
 
   // 5. Withdraw Liquidity
   const withdrawLiquidity = useCallback(
-    async (amountStr: string, toAddress: string): Promise<boolean> => {
+    async (amountStr: string): Promise<boolean> => {
       if (!vaultManager || !account) {
         setError("VaultManager or wallet not connected.");
         return false;
@@ -294,17 +299,12 @@ export function useAdmin(
         return false;
       }
 
-      if (!ethers.isAddress(toAddress)) {
-        setError("Please enter a valid recipient Ethereum address.");
-        return false;
-      }
-
       try {
         setStatus("awaiting-signature");
         setError(null);
 
         const amount = ethers.parseUnits(amountStr, 6);
-        const tx = await vaultManager.withdrawLiquidity(amount, toAddress);
+        const tx = await vaultManager.withdrawVault(amount);
         setStatus("pending");
         const receipt = await tx.wait();
 
@@ -312,7 +312,7 @@ export function useAdmin(
         setLatestResult({
           action: "Liquidity Withdrawn",
           txHash: receipt.hash,
-          details: `Withdrew ${amountStr} MockUSDC to ${toAddress}.`,
+          details: `Withdrew ${amountStr} MockUSDC to the bank admin wallet (${account}).`,
           blockNumber: receipt.blockNumber,
         });
 
@@ -446,61 +446,6 @@ export function useAdmin(
     [mockUSDC, account, fetchAdminData, onSuccessCallback]
   );
 
-  // 9. Set Deposit Timeline (Sepolia testing / maturity control)
-  const setDepositTimeline = useCallback(
-    async (
-      depositId: number,
-      newStartAt: number,
-      newMaturityAt: number
-    ): Promise<boolean> => {
-      if (!savingCore || !account) {
-        setError("SavingCore contract or wallet not connected.");
-        return false;
-      }
-
-      if (depositId <= 0) {
-        setError("Valid deposit ID is required.");
-        return false;
-      }
-
-      if (newMaturityAt <= newStartAt) {
-        setError("Maturity timestamp must be strictly greater than start timestamp.");
-        return false;
-      }
-
-      try {
-        setStatus("awaiting-signature");
-        setError(null);
-
-        const tx = await savingCore.setDepositTimeline(
-          BigInt(depositId),
-          BigInt(newStartAt),
-          BigInt(newMaturityAt)
-        );
-        setStatus("pending");
-        const receipt = await tx.wait();
-
-        setStatus("success");
-        setLatestResult({
-          action: "Deposit Timeline Updated",
-          txHash: receipt.hash,
-          details: `Deposit #${depositId} adjusted: Start = ${new Date(newStartAt * 1000).toLocaleString()}, Maturity = ${new Date(newMaturityAt * 1000).toLocaleString()}.`,
-          blockNumber: receipt.blockNumber,
-        });
-
-        await fetchAdminData();
-        onSuccessCallback?.();
-        return true;
-      } catch (err) {
-        console.error("Failed to update deposit timeline:", err);
-        setError(parseTransactionError(err));
-        setStatus("error");
-        return false;
-      }
-    },
-    [savingCore, account, fetchAdminData, onSuccessCallback]
-  );
-
   const resetStatus = useCallback(() => {
     setStatus("idle");
     setError(null);
@@ -520,7 +465,6 @@ export function useAdmin(
     togglePause,
     setFeeReceiver,
     mintAdminDemoTokens,
-    setDepositTimeline,
     refetch: fetchAdminData,
     resetStatus,
   };

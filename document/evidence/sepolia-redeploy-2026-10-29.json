@@ -1,0 +1,42 @@
+{
+  "checkedAt": "2026-10-29T15:10:21.172Z",
+  "chainId": 11155111,
+  "contracts": {
+    "MockUSDC": {
+      "address": "0x578d4C3f5A95a6797aD8445487062b6469768a58",
+      "deploymentTxHash": "0xd996bddbcc4ba5306c571b4ede516eadb71704371264eaf51c85e2fe910262c7",
+      "blockNumber": 12011057
+    },
+    "VaultManager": {
+      "address": "0xE3D2f34cAe33D694e649c5975A4875E026bdf4c2",
+      "deploymentTxHash": "0x74e567a2576ada1f6619a53347b671da6a5122d3f77793068901ff8c1c6b427a",
+      "blockNumber": 12020300
+    },
+    "SavingCore": {
+      "address": "0x69371d5829aEb695BC4b12Bd9243AF8584eb0681",
+      "deploymentTxHash": "0x47a0eafc0e55ea521fd50f04f5c4ff67670ed1f3ce3962de3bbc400df85f7770",
+      "blockNumber": 12020301
+    }
+  },
+  "binding": {
+    "txHash": "0x503e49d1d4130ad491e56229b5b8293b3cb2f69dd1bfb6be8eafb2a9d824e7d8",
+    "verified": true
+  },
+  "seed": {
+    "verified": true,
+    "seededAt": "2026-10-29T15:09:48.591Z",
+    "planCount": 3,
+    "vaultFundedAmount": "5000.0",
+    "demoUserMinted": "5000.0"
+  },
+  "defaultPlanDurationSeconds": "15552000",
+  "fiveSecondPlanSimulationPassed": true,
+  "legacyAdminTimelineCallRejected": true,
+  "publicSepoliaRedeployed": true,
+  "note": "5-second creation checked by eth_call; no extra demo plan or deposit broadcast.",
+  "deploymentVerification": {
+    "command": "npm.cmd run verify-deploy:sepolia",
+    "exitCode": 0,
+    "allChecksPassed": true
+  }
+}

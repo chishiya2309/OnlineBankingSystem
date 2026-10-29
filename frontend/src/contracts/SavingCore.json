@@ -1,10 +1,10 @@
 {
   "contractName": "SavingCore",
-  "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-  "deploymentTxHash": "0x9f2798cb9ddecb9429ce354a6001b20ead65c5e5ef851ce8a85dda8fabd79c76",
-  "blockNumber": 3,
-  "network": "localhost",
-  "chainId": 31337,
+  "address": "0x69371d5829aEb695BC4b12Bd9243AF8584eb0681",
+  "deploymentTxHash": "0x47a0eafc0e55ea521fd50f04f5c4ff67670ed1f3ce3962de3bbc400df85f7770",
+  "blockNumber": 12020301,
+  "network": "sepolia",
+  "chainId": 11155111,
   "abi": [
     {
       "inputs": [
@@ -289,22 +289,6 @@
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "newStartAt",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "newMaturityAt",
-          "type": "uint256"
-        }
-      ],
-      "name": "InvalidDepositTimeline",
-      "type": "error"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
           "name": "secondsValue",
           "type": "uint256"
         }
@@ -332,6 +316,17 @@
         }
       ],
       "name": "InvalidTenor",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tenorSeconds",
+          "type": "uint256"
+        }
+      ],
+      "name": "InvalidTenorSeconds",
       "type": "error"
     },
     {
@@ -503,43 +498,6 @@
         {
           "indexed": true,
           "internalType": "uint256",
-          "name": "depositId",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "oldStartAt",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "oldMaturityAt",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "newStartAt",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "newMaturityAt",
-          "type": "uint256"
-        }
-      ],
-      "name": "DepositTimelineUpdated",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "uint256",
           "name": "planId",
           "type": "uint256"
         },
@@ -557,6 +515,25 @@
         }
       ],
       "name": "PlanCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "planId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tenorSeconds",
+          "type": "uint256"
+        }
+      ],
+      "name": "PlanDurationSet",
       "type": "event"
     },
     {
@@ -818,6 +795,50 @@
         }
       ],
       "name": "createPlan",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "planId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tenorSeconds",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "aprBps",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "minDeposit",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "maxDeposit",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "penaltyBps",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "enabled",
+          "type": "bool"
+        }
+      ],
+      "name": "createPlanSeconds",
       "outputs": [
         {
           "internalType": "uint256",
@@ -1116,6 +1137,25 @@
       "inputs": [
         {
           "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "planDurationSeconds",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
           "name": "depositId",
           "type": "uint256"
         },
@@ -1201,29 +1241,6 @@
         }
       ],
       "name": "setApprovalForAll",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "depositId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "newStartAt",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "newMaturityAt",
-          "type": "uint256"
-        }
-      ],
-      "name": "setDepositTimeline",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

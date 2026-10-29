@@ -1,127 +1,52 @@
-# LEDGER — Web3 Digital Savings & Term Deposit Frontend
+# Ledger — Frontend user/admin
 
-A production-grade, fintech-focused Web3 frontend for the **Online Banking System (Blockchain-based Term Deposit)**. Built with **React 18, TypeScript, Vite, ethers.js 6**, and designed under the **Nutlope/Hallmark** design framework (Theme: **Dusk — Ledger / Digital Savings**).
+React 18 + TypeScript + Vite + ethers v6 cho Online Banking System. Hướng dẫn đầy đủ về kiến trúc, Personal Variant, setup, migration và 7 Design Answers nằm trong [README gốc](../README.md).
 
----
+## Chạy nhanh
 
-## Key Features
+Từ root repository:
 
-- **MetaMask Web3 Connection**: Native EIP-1193 integration with real-time account and network state detection, automatic event listeners, and seamless network switching.
-- **Local-first Architecture**: Direct persistent connection to Hardhat local node (`http://127.0.0.1:8545`, Chain ID `31337`), with optional, non-blocking support for Ethereum Sepolia (`11155111`).
-- **Live On-chain Term Deposit Plans**: Dynamic querying of `planCount()` and `getPlan()` from `SavingCore.sol`. Accurately handles active and disabled states.
-- **6-Decimal Token Arithmetic**: Strict precision formatting and parsing for `MockUSDC` (using `ethers.parseUnits(amount, 6)`); eliminates JavaScript floating-point errors.
-- **Two-Step Approve & Open Deposit Flow**: Automatic detection of existing ERC20 allowances. Skips redundant approvals when allowance is already sufficient.
-- **On-chain NFT Certificate Verification**: Parses the `DepositOpened` event upon transaction confirmation, queries `ownerOf(depositId)` to confirm ERC721 certificate ownership, and verifies active deposit state.
-- **Hallmark Anti-AI-Slop Design**: Dusk palette featuring dark twilight slate surfaces, smoked glass product containers with lit edges, periwinkle and apricot signals, Wix Madefor typography, tabular numerals for all financial figures, and strict `:focus-visible` accessibility.
-- **Built-in Demo Faucet**: One-click "Mint 1,000 USDC" action leveraging `MockUSDC.mint()` for self-serve testing with any connected MetaMask account.
-
----
-
-## Project Structure
-
-```
-frontend/
-├── public/
-├── src/
-│   ├── app/
-│   │   └── App.tsx                 # Main application dashboard layout
-│   ├── components/
-│   │   ├── layout/
-│   │   │   ├── Header.tsx          # Wordmark, network indicator, wallet connection
-│   │   │   └── Footer.tsx          # Contract transparency & design attribution
-│   │   ├── overview/
-│   │   │   └── AccountOverview.tsx # Balances, allowances, and demo minting
-│   │   ├── plans/
-│   │   │   ├── PlanList.tsx        # Dynamic on-chain plans grid
-│   │   │   └── PlanCard.tsx        # Individual plan terms (APR, tenor, penalty)
-│   │   └── deposit/
-│   │       ├── DepositForm.tsx     # Amount input, interest preview, approve & deposit
-│   │       └── TransactionReceiptCard.tsx # Confirmed receipt & NFT proof
-│   ├── config/
-│   │   └── networks.ts             # Supported chains (31337 Localhost, 11155111 Sepolia)
-│   ├── contracts/                  # Exported ABIs & address manifests (networks.json)
-│   ├── hooks/
-│   │   ├── useWallet.ts            # EIP-1193 MetaMask integration & listeners
-│   │   ├── useContracts.ts         # Contract instances & runtime bytecode guards
-│   │   ├── useSavingPlans.ts       # On-chain plan querying
-│   │   └── useDepositFlow.ts       # Allowance, approve, openDeposit, and receipt parsing
-│   ├── lib/
-│   │   ├── contracts.ts            # Contract loader and bytecode verification
-│   │   ├── errors.ts               # Human-readable Web3 and Solidity error translation
-│   │   ├── financials.ts           # Exact contractual interest and penalty math
-│   │   └── format.ts               # 6-decimal USDC, bps, duration, address formatters
-│   ├── styles/
-│   │   ├── tokens.css              # Hallmark Dusk CSS custom properties
-│   │   ├── base.css                # Hallmark Floor constraints, focus, reset
-│   │   └── app.css                 # Fintech dashboard design system
-│   ├── test/                       # Vitest component & business logic unit tests
-│   ├── types/                      # TypeScript domain models
-│   ├── main.tsx                    # React application entry point
-│   └── vite-env.d.ts               # Window.ethereum and Vite client declarations
-├── index.html                      # HTML entry with Wix Madefor font imports
-├── package.json                    # Dependencies & build scripts
-├── tsconfig.json                   # Strict TypeScript configuration
-└── vite.config.ts                  # Vite + Vitest configuration
-```
-
----
-
-## Getting Started
-
-### 1. Ensure Hardhat Local Node is Running
-From the repository root:
 ```powershell
-npm run node
+npm.cmd ci
+npm.cmd --prefix frontend ci
+npm.cmd run demo:local
 ```
-Keep this terminal running.
 
-### 2. Deploy and Seed Contracts
-In a second terminal:
+Mở `http://127.0.0.1:5174`, cấu hình MetaMask với RPC `http://127.0.0.1:18545`, chain ID 31337. Stack tự deploy/seed contract mới. Chi tiết tài khoản demo nằm trong README gốc và [D5-02](../document/D5-02.md).
+
+Nếu dùng node persistent riêng tại 8545, chạy `deploy:localhost`, `seed:localhost`, `verify-deploy:localhost` từ root rồi `frontend:dev`; UI mặc định tại 5173. Với Sepolia, deploy/seed/verify đúng network trước và chọn chain 11155111 trong MetaMask.
+
+## Luồng user
+
+- Connect MetaMask, xem plan và số dư MockUSDC; faucet dùng token test permissionless.
+- Chọn plan, nhập principal; approve nếu thiếu allowance rồi Open Deposit để nhận NFT.
+- Portfolio đọc `ownerOf`, hiển thị Active/History và lineage; holder hiện tại được rút hoặc manual renew.
+- Early withdrawal trả P − penalty; maturity trả P + I; manual renewal chọn target enabled; auto-renew giữ snapshot cũ sau grace.
+- Eligibility dùng block timestamp; Refresh Portfolio sau thời gian thay đổi hoặc giao dịch bên ngoài. Receipt và balance được tải lại sau action thành công.
+
+## Luồng admin
+
+Admin Portal đọc role từ `VaultManager.owner()`. Có thể tạo plan với duration **Days/Minutes/Seconds**, sửa APR cho deposit tương lai, enable/disable plan, fund/withdraw vault, đổi feeReceiver và pause/unpause.
+
+**Không có UI/API sửa timeline của deposit đang mở.** Kỳ hạn được chốt khi mở deposit; plan 5 giây vẫn dùng APR theo năm và grace 2 ngày. Lãi/payout của deposit dưới một ngày hiển thị đủ 6 decimals, ví dụ `0.000003 USDC`; timestamp hiển thị cả giây.
+
+`planDurationSeconds` là nguồn duration chính xác. Trên deployment cũ, giao diện vẫn có thể đọc plan theo ngày nhưng không cho tạo plan ngắn và hiển thị yêu cầu deploy bản mới. Chỉ thay ABI/ẩn UI không loại bỏ được quyền timeline trên contract cũ; cần VaultManager/Core mới theo hướng dẫn migration ở README gốc.
+
+## Kiểm thử
+
 ```powershell
-npm run deploy:localhost
-npm run seed:localhost
-npm run verify-deploy:localhost
-npm run export-contracts
+npm.cmd --prefix frontend run typecheck
+npm.cmd --prefix frontend test
+npm.cmd --prefix frontend run build
+npx.cmd playwright install chromium
+npm.cmd run test:e2e
+npm.cmd run test:e2e:report
 ```
 
-### 3. Launch Frontend Development Server
-```powershell
-cd frontend
-npm install
-npm run dev
-```
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+Đã xác minh 29/10/2026: **76 Vitest tests**, **10 browser E2E**, typecheck và build đạt. Browser E2E dùng provider EIP-1193 thử nghiệm với giao dịch thật trên Hardhat; không phải một phiên điều khiển extension MetaMask thật. Xem [D5-03](../document/D5-03.md) để biết bằng chứng mới nhất.
 
-### 4. Connect MetaMask
-1. Add/switch to network: **Hardhat Localhost**
-   - RPC URL: `http://127.0.0.1:8545`
-   - Chain ID: `31337`
-   - Currency Symbol: `ETH`
-2. Connect your account.
-3. If your balance is 0.00 USDC, click **+ Mint 1,000 USDC**.
-4. Select **Plan #1** (180 days, 2.00% APR).
-5. Enter amount (e.g. `500.00` USDC).
-6. Click **Step 1/2: Approve 500.00 MockUSDC** and confirm in MetaMask.
-7. Click **Step 2/2: Open Deposit (500.00 USDC)** and confirm in MetaMask.
-8. View your confirmed on-chain deposit receipt with new Certificate NFT ID (`#2 SDC`).
+## Cấu hình và mã nguồn
 
----
+`VITE_LOCAL_RPC_URL` đổi RPC local mặc định 8545; demo/E2E dùng 18545. ABI/địa chỉ nằm trong `src/contracts/`, được deploy/seed/export scripts sinh ra. Khi `BANKING_ARTIFACT_ROOT` được đặt cho demo/E2E, Vite dùng ABI/registry của thư mục output riêng, không ghi đè manifests đang dùng.
 
-## Testing & Quality Assurance
-
-- **TypeScript Typecheck**:
-  ```powershell
-  npm run typecheck
-  ```
-- **Vitest Unit Tests**:
-  ```powershell
-  npm test
-  ```
-- **Hallmark Sloplint Audit**:
-  ```powershell
-  npm run lint:hallmark
-  ```
-- **Production Build**:
-  ```powershell
-  npm run build
-  ```
+`src/hooks/` quản lý wallet, contracts, plans, deposit, portfolio, withdrawals, renewals và admin. `src/lib/` chứa math BigInt, format duration/USDC, giải mã revert bytes và portfolio discovery. `src/components/` chứa các view plans/deposit/portfolio/admin; `src/test/` là Vitest tests. Browser tests nằm tại `../e2e/`.

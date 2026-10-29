@@ -1,5 +1,18 @@
 import { describe, it, expect, vi } from "vitest";
 import { getContractAddresses, verifyContractBytecode } from "../lib/contracts";
+// Stable fixtures verify chain selection independently of redeployed addresses.
+vi.mock("../contracts/networks.json", () => ({ default: {
+  "31337": { contracts: {
+    MockUSDC: "0x1111111111111111111111111111111111111111",
+    VaultManager: "0x2222222222222222222222222222222222222222",
+    SavingCore: "0x3333333333333333333333333333333333333333",
+  } },
+  "11155111": { contracts: {
+    MockUSDC: "0x4444444444444444444444444444444444444444",
+    VaultManager: "0x5555555555555555555555555555555555555555",
+    SavingCore: "0x6666666666666666666666666666666666666666",
+  } },
+} }));
 import {
   isSupportedNetwork,
   getNetworkConfig,
@@ -11,17 +24,17 @@ describe("Contracts & Network Registry (FE-001, FE-002, FE-016)", () => {
   it("FE-001: contract configuration selects correct contracts for Localhost 31337", () => {
     const contracts = getContractAddresses(31337);
     expect(contracts).not.toBeNull();
-    expect(contracts?.MockUSDC).toMatch(/^0x[0-9a-fA-F]{40}$/);
-    expect(contracts?.VaultManager).toMatch(/^0x[0-9a-fA-F]{40}$/);
-    expect(contracts?.SavingCore).toMatch(/^0x[0-9a-fA-F]{40}$/);
+    expect(contracts?.MockUSDC).toBe("0x1111111111111111111111111111111111111111");
+    expect(contracts?.VaultManager).toBe("0x2222222222222222222222222222222222222222");
+    expect(contracts?.SavingCore).toBe("0x3333333333333333333333333333333333333333");
   });
 
   it("FE-001: contract configuration selects correct contracts for Sepolia 11155111", () => {
     const contracts = getContractAddresses(11155111);
     expect(contracts).not.toBeNull();
-    expect(contracts?.MockUSDC).toBe("0x578d4C3f5A95a6797aD8445487062b6469768a58");
-    expect(contracts?.VaultManager).toBe("0x2c46fFeFb05188204D3653Ea402C9A65EB8c195a");
-    expect(contracts?.SavingCore).toBe("0x412a613320E537226D896e5B6Cd3EE439979E276");
+    expect(contracts?.MockUSDC).toBe("0x4444444444444444444444444444444444444444");
+    expect(contracts?.VaultManager).toBe("0x5555555555555555555555555555555555555555");
+    expect(contracts?.SavingCore).toBe("0x6666666666666666666666666666666666666666");
   });
 
   it("FE-001: returns null for unsupported chain ID", () => {

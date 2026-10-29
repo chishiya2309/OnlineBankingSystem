@@ -5,9 +5,12 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 export const PROJECT_ROOT = path.resolve(__dirname, "../..");
-export const DEPLOYMENTS_DIR = path.resolve(PROJECT_ROOT, "deployments");
-export const EXPORTS_DIR = path.resolve(PROJECT_ROOT, "exports/contracts");
-export const FRONTEND_CONTRACTS_DIR = path.resolve(PROJECT_ROOT, "frontend/src/contracts");
+const OUTPUT_ROOT = process.env.BANKING_ARTIFACT_ROOT
+  ? path.resolve(PROJECT_ROOT, process.env.BANKING_ARTIFACT_ROOT)
+  : PROJECT_ROOT;
+export const DEPLOYMENTS_DIR = path.resolve(OUTPUT_ROOT, "deployments");
+export const EXPORTS_DIR = path.resolve(OUTPUT_ROOT, "exports/contracts");
+export const FRONTEND_CONTRACTS_DIR = path.resolve(OUTPUT_ROOT, "frontend/src/contracts");
 export const ARTIFACTS_DIR = path.resolve(PROJECT_ROOT, "artifacts/contracts");
 
 export interface ContractDeploymentRecord {

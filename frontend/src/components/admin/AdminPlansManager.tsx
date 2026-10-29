@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { formatDurationSeconds } from "../../lib/format";
 import type { SavingPlan, CreatePlanInput, AdminActionStatus } from "../../types";
 
 interface AdminPlansManagerProps {
   plans: SavingPlan[];
+  supportsSecondPlans: boolean;
   status: AdminActionStatus;
   onCreatePlan: (input: CreatePlanInput) => Promise<boolean>;
   onUpdatePlanApr: (planId: number, newAprBps: number) => Promise<boolean>;
@@ -11,6 +13,7 @@ interface AdminPlansManagerProps {
 
 export const AdminPlansManager: React.FC<AdminPlansManagerProps> = ({
   plans,
+  supportsSecondPlans,
   status,
   onCreatePlan,
   onUpdatePlanApr,
@@ -21,7 +24,8 @@ export const AdminPlansManager: React.FC<AdminPlansManagerProps> = ({
   const [newAprPercent, setNewAprPercent] = useState("");
 
   // Create plan state
-  const [tenorDays, setTenorDays] = useState("90");
+  const [durationValue, setDurationValue] = useState("90");
+  const [durationUnit, setDurationUnit] = useState<"days" | "minutes" | "seconds">("days");
   const [aprPercent, setAprPercent] = useState("4.50");
   const [penaltyPercent, setPenaltyPercent] = useState("5.00");
   const [minDeposit, setMinDeposit] = useState("");
@@ -32,16 +36,17 @@ export const AdminPlansManager: React.FC<AdminPlansManagerProps> = ({
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const days = parseInt(tenorDays, 10);
+    const duration = Number(durationValue);
+    const seconds = duration * ({ days: 86400, minutes: 60, seconds: 1 }[durationUnit]);
     const aprBps = Math.round(parseFloat(aprPercent) * 100);
     const penaltyBps = Math.round(parseFloat(penaltyPercent) * 100);
 
-    if (isNaN(days) || days <= 0) return;
-    if (isNaN(aprBps) || aprBps <= 0) return;
+    if (!Number.isSafeInteger(duration) || duration <= 0 || !Number.isSafeInteger(seconds) || seconds > 4294967295 * 86400) return;
+    if (isNaN(aprBps) || aprBps < 0) return;
     if (isNaN(penaltyBps) || penaltyBps < 0) return;
 
     const ok = await onCreatePlan({
-      tenorDays: days,
+      tenorSeconds: seconds,
       aprBps,
       earlyWithdrawPenaltyBps: penaltyBps,
       minDeposit: minDeposit.trim(),
@@ -58,7 +63,7 @@ export const AdminPlansManager: React.FC<AdminPlansManagerProps> = ({
 
   const handleUpdateAprSubmit = async (planId: number) => {
     const bps = Math.round(parseFloat(newAprPercent) * 100);
-    if (isNaN(bps) || bps <= 0) return;
+    if (isNaN(bps) || bps < 0) return;
 
     const ok = await onUpdatePlanApr(planId, bps);
     if (ok) {
@@ -95,16 +100,27 @@ export const AdminPlansManager: React.FC<AdminPlansManagerProps> = ({
             Create new saving plan
           </h4>
 
+          {!supportsSecondPlans && <p role="status">This deployment supports whole days only. Deploy the latest SavingCore to enable short plans.</p>}
+          <p className="body-sm">The term is fixed when a deposit opens. APR remains annualized, including short terms. Auto-renew still requires the configured grace period.</p>
           <div className="admin-form-grid">
             <div className="form-group">
-              <label className="form-label" htmlFor="plan-tenor">Tenor (days)</label>
+              <label className="form-label" htmlFor="plan-duration-unit">Duration unit</label>
+              <select id="plan-duration-unit" className="input-field" value={durationUnit} disabled={isBusy}
+                onChange={e => setDurationUnit(e.target.value as typeof durationUnit)}>
+                <option value="days">Days</option>
+                <option value="minutes" disabled={!supportsSecondPlans}>Minutes</option>
+                <option value="seconds" disabled={!supportsSecondPlans}>Seconds</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label" htmlFor="plan-tenor">Tenor ({durationUnit})</label>
               <input
                 id="plan-tenor"
                 type="number"
                 min="1"
                 className="input-field tabular-num"
-                value={tenorDays}
-                onChange={(e) => setTenorDays(e.target.value)}
+                value={durationValue}
+                onChange={(e) => setDurationValue(e.target.value)}
                 required
                 disabled={isBusy}
               />
@@ -116,7 +132,7 @@ export const AdminPlansManager: React.FC<AdminPlansManagerProps> = ({
                 id="plan-apr"
                 type="number"
                 step="0.01"
-                min="0.01"
+                min="0"
                 max="100"
                 className="input-field tabular-num"
                 value={aprPercent}
@@ -234,14 +250,14 @@ export const AdminPlansManager: React.FC<AdminPlansManagerProps> = ({
                 return (
                   <tr key={p.planId}>
                     <td className="tabular-num">#{p.planId}</td>
-                    <td className="tabular-num">{p.tenorDays} days</td>
+                    <td className="tabular-num">{formatDurationSeconds(p.tenorSeconds)}</td>
                     <td className="tabular-num" style={{ color: "var(--color-accent-hi)" }}>
                       {isEditing ? (
                         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                           <input
                             type="number"
                             step="0.01"
-                            min="0.01"
+                            min="0"
                             className="input-field tabular-num"
                             style={{ width: "80px", padding: "2px 6px" }}
                             value={newAprPercent}
@@ -252,10 +268,10 @@ export const AdminPlansManager: React.FC<AdminPlansManagerProps> = ({
                           <span>%</span>
                         </div>
                       ) : (
-                        `${p.aprPercent}%`
+                        p.aprPercent
                       )}
                     </td>
-                    <td className="tabular-num">{p.penaltyPercent}%</td>
+                    <td className="tabular-num">{p.penaltyPercent}</td>
                     <td className="tabular-num">
                       {p.minDeposit > 0n || p.maxDeposit > 0n
                         ? `${p.minDepositFormatted} to ${p.maxDepositFormatted} USDC`
@@ -299,7 +315,7 @@ export const AdminPlansManager: React.FC<AdminPlansManagerProps> = ({
                               className="btn btn-ghost btn-sm text-nowrap"
                               onClick={() => {
                                 setEditingPlanId(p.planId);
-                                setNewAprPercent(p.aprPercent);
+                                setNewAprPercent((p.aprBps / 100).toFixed(2));
                               }}
                               disabled={isBusy}
                               style={{ whiteSpace: "nowrap" }}

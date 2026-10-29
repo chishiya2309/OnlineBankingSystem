@@ -1,7 +1,7 @@
 import React from "react";
 import type { DepositRecord } from "../../types";
 import type { UseRenewalState } from "../../hooks/useRenewal";
-import { formatBps, formatTimestamp, formatUSDC, shortenAddress } from "../../lib/format";
+import { formatDurationSeconds, formatBps, formatTimestamp, formatUSDC, shortenAddress } from "../../lib/format";
 
 interface AutoRenewDialogProps {
   deposit: DepositRecord | null;
@@ -153,7 +153,7 @@ export const AutoRenewDialog: React.FC<AutoRenewDialogProps> = ({
                   New Principal (P + I)
                 </span>
                 <span className="detail-value tabular-num" style={{ fontSize: "16px", fontWeight: 600, color: "var(--color-accent-2)" }}>
-                  {formatUSDC(compoundedPrincipal)} USDC
+                  {formatUSDC(compoundedPrincipal, deposit.tenorSeconds < 86400 ? 6 : 2)} USDC
                 </span>
               </div>
             </div>
@@ -168,7 +168,7 @@ export const AutoRenewDialog: React.FC<AutoRenewDialogProps> = ({
               </div>
               <div className="detail-row">
                 <span className="detail-label">Locked Tenor</span>
-                <span className="detail-value tabular-num">{(deposit.tenorSeconds / 86400).toFixed(0)} days</span>
+                <span className="detail-value tabular-num">{formatDurationSeconds(deposit.tenorSeconds)}</span>
               </div>
               <div className="detail-row">
                 <span className="detail-label">Locked Early Penalty</span>

@@ -253,9 +253,9 @@ export async function deployContracts(options: DeployOptions = {}): Promise<Depl
   }
 
   // Verification of VaultManager with retryCall
-  const vaultToken = await retryCall(() => vaultManager.token(), "VaultManager.token()");
-  const vaultOwner = await retryCall(() => vaultManager.owner(), "VaultManager.owner()");
-  const vaultFeeReceiver = await retryCall(() => vaultManager.feeReceiver(), "VaultManager.feeReceiver()");
+  const vaultToken = await retryCall<string>(() => vaultManager.token(), "VaultManager.token()");
+  const vaultOwner = await retryCall<string>(() => vaultManager.owner(), "VaultManager.owner()");
+  const vaultFeeReceiver = await retryCall<string>(() => vaultManager.feeReceiver(), "VaultManager.feeReceiver()");
   assert.equal(vaultToken.toLowerCase(), mockUSDCAddress.toLowerCase(), "Vault token must match MockUSDC address");
   assert.equal(vaultOwner.toLowerCase(), bankAdminAddress.toLowerCase(), "Vault owner must match Bank Admin");
   assert.equal(vaultFeeReceiver.toLowerCase(), feeReceiverAddress.toLowerCase(), "Vault fee receiver must match configured address");
@@ -289,6 +289,11 @@ export async function deployContracts(options: DeployOptions = {}): Promise<Depl
   if (reuseCore && existingCoreAddr) {
     coreAddress = existingCoreAddr;
     savingCore = coreFactory.attach(coreAddress);
+    try {
+      await savingCore.planDurationSeconds(0);
+    } catch {
+      throw new Error("LEGACY_CORE_REQUIRES_REDEPLOY: Existing SavingCore predates immutable deposit terms and short plans. Use FORCE_REDEPLOY=true to deploy a new VaultManager and SavingCore; existing deposits remain on the old contracts.");
+    }
     coreDepTxHash = manifest.contracts.SavingCore.deploymentTxHash ?? "";
     coreDepBlock = manifest.contracts.SavingCore.blockNumber;
     console.log(`\n--- [Phase C] SavingCore already deployed: ${coreAddress} (resuming from checkpoint) ---`);
@@ -307,8 +312,8 @@ export async function deployContracts(options: DeployOptions = {}): Promise<Depl
   }
 
   // Verification of SavingCore with retryCall
-  const coreVault = await retryCall(() => savingCore.vaultManager(), "SavingCore.vaultManager()");
-  const coreToken = await retryCall(() => savingCore.token(), "SavingCore.token()");
+  const coreVault = await retryCall<string>(() => savingCore.vaultManager(), "SavingCore.vaultManager()");
+  const coreToken = await retryCall<string>(() => savingCore.token(), "SavingCore.token()");
   const coreGrace = await retryCall(() => savingCore.gracePeriodSeconds(), "SavingCore.gracePeriodSeconds()");
   assert.equal(coreVault.toLowerCase(), vaultAddress.toLowerCase(), "Core vaultManager must match VaultManager");
   assert.equal(coreToken.toLowerCase(), mockUSDCAddress.toLowerCase(), "Core token must match MockUSDC");
@@ -326,7 +331,7 @@ export async function deployContracts(options: DeployOptions = {}): Promise<Depl
   // ============================================================================
   console.log(`\n--- [Phase D] Authorizing Core Binding on VaultManager ---`);
   let bindTxHash = manifest.binding?.txHash ?? "";
-  const currentBoundCore = await retryCall(() => vaultManager.savingCore(), "VaultManager.savingCore()");
+  const currentBoundCore = await retryCall<string>(() => vaultManager.savingCore(), "VaultManager.savingCore()");
 
   if (currentBoundCore.toLowerCase() === coreAddress.toLowerCase()) {
     console.log(`SavingCore already bound to VaultManager: ${currentBoundCore}`);
@@ -339,7 +344,7 @@ export async function deployContracts(options: DeployOptions = {}): Promise<Depl
     console.log(`  Tx Hash: ${bindTxHash}`);
     console.log(`  Block:   ${bindReceipt?.blockNumber}`);
 
-    const boundCore = await retryCall(() => vaultManager.savingCore(), "VaultManager.savingCore() after bind");
+    const boundCore = await retryCall<string>(() => vaultManager.savingCore(), "VaultManager.savingCore() after bind");
     assert.equal(boundCore.toLowerCase(), coreAddress.toLowerCase(), "VaultManager savingCore must be bound to SavingCore");
     console.log(`Binding Verified on-chain: vaultManager.savingCore() == ${boundCore}`);
   }

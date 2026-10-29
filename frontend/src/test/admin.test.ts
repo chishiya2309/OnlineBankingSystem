@@ -6,6 +6,11 @@ import { formatUSDC, parseUSDC } from "../lib/format";
 
 describe("Admin Portal & Sepolia Multi-Network Unit Tests", () => {
   describe("Admin Error Parsing & Decoding", () => {
+    it("decodes the current NotBankAdmin custom error", () => {
+      expect(parseTransactionError(new Error("NotBankAdmin(0x1234)"))).toBe(
+        "Action rejected: Connected wallet is not the authorized Bank Admin."
+      );
+    });
     it("decodes OnlyBankAdmin and OwnableUnauthorizedAccount error correctly", () => {
       const err1 = new Error("execution reverted: OnlyBankAdmin()");
       expect(parseTransactionError(err1)).toBe(
@@ -130,46 +135,4 @@ describe("Admin Portal & Sepolia Multi-Network Unit Tests", () => {
     });
   });
 
-  describe("Sepolia Deposit Maturity Timeline Controls", () => {
-    it("decodes InvalidDepositTimeline error correctly", () => {
-      const err = new Error("execution reverted: InvalidDepositTimeline(100, 50)");
-      expect(parseTransactionError(err)).toBe(
-        "Invalid deposit timeline: Maturity timestamp must be strictly greater than start timestamp."
-      );
-    });
-
-    it("decodes NotBankAdmin error correctly", () => {
-      const err = new Error("NotBankAdmin(0x1234)");
-      expect(parseTransactionError(err)).toBe(
-        "Action rejected: Connected wallet is not the authorized Bank Admin."
-      );
-    });
-
-    it("computes 'Mature Immediately' timeline preserving full tenor duration", () => {
-      const now = 1700000000;
-      const originalStart = 1699900000;
-      const originalMaturity = 1705000000;
-      const originalTenor = originalMaturity - originalStart; // 5,100,000s
-
-      const targetMaturity = now - 5;
-      const targetStart = targetMaturity - originalTenor;
-
-      expect(targetMaturity).toBeLessThan(now); // is matured
-      expect(targetMaturity - targetStart).toBe(originalTenor); // full interest preserved
-      expect(targetStart).toBeLessThan(targetMaturity);
-    });
-
-    it("computes 'Expire Grace Period' timeline for auto-renew testing", () => {
-      const now = 1700000000;
-      const gracePeriod = 172800; // 2 days
-      const originalTenor = 180 * 86400;
-
-      const targetMaturity = now - gracePeriod - 60;
-      const targetStart = targetMaturity - originalTenor;
-
-      const graceEnd = targetMaturity + gracePeriod;
-      expect(now).toBeGreaterThan(graceEnd); // eligible for auto-renewal
-      expect(targetMaturity - targetStart).toBe(originalTenor);
-    });
-  });
 });

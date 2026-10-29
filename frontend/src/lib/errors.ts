@@ -1,12 +1,34 @@
 /**
  * Error decoding and human-readable formatting for Web3 & Solidity contract reverts.
  */
+import { Interface } from "ethers";
+import SavingCore from "../contracts/SavingCore.json";
+import VaultManager from "../contracts/VaultManager.json";
+import MockUSDC from "../contracts/MockUSDC.json";
+
+const errorInterfaces = [SavingCore, VaultManager, MockUSDC].map(contract => new Interface(contract.abi));
+
+function decodedErrorName(error: any): string {
+  if (error.revert?.name) return String(error.revert.name);
+  const candidates = [error.data, error.error?.data, error.info?.error?.data, error.cause?.data];
+  for (const candidate of candidates) {
+    const data = typeof candidate === "string" ? candidate : candidate?.data ?? candidate?.result;
+    if (typeof data !== "string" || !/^0x[0-9a-f]+$/i.test(data)) continue;
+    for (const contract of errorInterfaces) {
+      try {
+        const parsed = contract.parseError(data);
+        if (parsed) return parsed.name;
+      } catch { /* Error belongs to another contract ABI. */ }
+    }
+  }
+  return "";
+}
 
 export function parseTransactionError(error: any): string {
   if (!error) return "An unknown error occurred.";
 
   const message = error.message || error.toString();
-  const lowerMsg = message.toLowerCase();
+  const lowerMsg = `${message} ${decodedErrorName(error)}`.toLowerCase();
 
   // User rejection
   if (
@@ -75,12 +97,13 @@ export function parseTransactionError(error: any): string {
     return "Insufficient MockUSDC balance in your wallet.";
   }
 
+  if (lowerMsg.includes("invalidtenorseconds") || lowerMsg.includes("invalidtenor")) {
+    return "Plan duration must be a positive whole number of seconds within the supported maximum.";
+  }
+
   // Admin custom errors
   if (lowerMsg.includes("notbankadmin") || lowerMsg.includes("onlybankadmin") || lowerMsg.includes("ownableunauthorizedaccount")) {
     return "Action rejected: Connected wallet is not the authorized Bank Admin.";
-  }
-  if (lowerMsg.includes("invaliddeposittimeline")) {
-    return "Invalid deposit timeline: Maturity timestamp must be strictly greater than start timestamp.";
   }
   if (lowerMsg.includes("planpenaltytoohigh")) {
     return "Penalty rate cannot exceed 100% (10,000 basis points).";

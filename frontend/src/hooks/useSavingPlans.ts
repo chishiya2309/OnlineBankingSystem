@@ -43,8 +43,11 @@ export function useSavingPlans(
       for (let i = 1; i <= count; i++) {
         const planId = i;
         planPromises.push(
-          savingCore.getPlan(planId).then((planData: any) => {
+          savingCore.getPlan(planId).then(async (planData: any) => {
             const tenorDays = Number(planData.tenorDays ?? planData[0]);
+            // Existing deployments only support whole days; new deployments expose exact seconds.
+            const tenorSeconds = Number(await savingCore.planDurationSeconds(planId)
+              .catch(() => BigInt(tenorDays) * 86400n));
             const aprBps = Number(planData.aprBps ?? planData[1]);
             const minDeposit = BigInt(planData.minDeposit ?? planData[2]);
             const maxDeposit = BigInt(planData.maxDeposit ?? planData[3]);
@@ -56,6 +59,7 @@ export function useSavingPlans(
             return {
               planId,
               tenorDays,
+              tenorSeconds,
               aprBps,
               aprPercent: formatBps(aprBps),
               minDeposit,
