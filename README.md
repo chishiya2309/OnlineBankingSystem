@@ -2,6 +2,9 @@
 
 Ứng dụng tiền gửi có kỳ hạn bằng MockUSDC trên Ethereum: người dùng mở deposit để nhận chứng chỉ ERC721, theo dõi portfolio, rút trước hạn/đáo hạn và tái tục. Bank Admin quản lý plan, quỹ lãi, feeReceiver và pause; **không có quyền sửa principal, APR snapshot, penalty snapshot, startAt hay maturityAt của deposit đã mở**.
 
+[![Video Demo](https://markdown-videos-api.jorgenkh.no/youtube/vs1NHUmvU0I)](https://www.youtube.com/watch?v=vs1NHUmvU0I)
+
+
 ## Personal Variant
 
 | Tham số | Công thức theo Student ID | Giá trị của dự án |
