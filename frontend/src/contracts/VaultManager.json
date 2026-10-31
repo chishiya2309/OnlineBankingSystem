@@ -1,8 +1,8 @@
 {
   "contractName": "VaultManager",
-  "address": "0xE3D2f34cAe33D694e649c5975A4875E026bdf4c2",
-  "deploymentTxHash": "0x74e567a2576ada1f6619a53347b671da6a5122d3f77793068901ff8c1c6b427a",
-  "blockNumber": 12020300,
+  "address": "0x004552432F71C74e1cC8E1AfD10DcC9F96D38b09",
+  "deploymentTxHash": "0x9f10dd8ec878fddd2143917dc493343c0ff829b58eaaf87be2d108f2de2965ea",
+  "blockNumber": 12032729,
   "network": "sepolia",
   "chainId": 11155111,
   "abi": [

@@ -225,23 +225,46 @@ describe("SavingCore - Task D3-03: Security & State Hardening", function () {
       expect((await f.savingCore.getDeposit(1)).status).to.equal(1);
     });
 
-    it("OWN-010: terminal NFT transfer succeeds under ERC721 but creates no claim rights", async function () {
+    it("OWN-010: terminal NFT is soulbound and cannot be transferred under ERC721", async function () {
       const f = await networkHelpers.loadFixture(maturedDepositFixture);
       await networkHelpers.time.setNextBlockTimestamp(f.deposit.maturityAt);
       await (await f.savingCore.connect(f.alice).withdrawAtMaturity(1)).wait();
 
-      // Alice transfers terminal NFT #1 to Bob
-      await (await f.savingCore.connect(f.alice).transferFrom(f.alice.address, f.bob.address, 1)).wait();
-      expect(await f.savingCore.ownerOf(1)).to.equal(f.bob.address);
-
-      // Bob attempts to withdraw or renew the terminal NFT -> REVERT DepositNotActive
-      await expect(f.savingCore.connect(f.bob).withdrawAtMaturity(1))
-        .to.be.revertedWithCustomError(f.savingCore, "DepositNotActive")
+      // Terminal status 1 (Withdrawn): Alice attempts to transfer terminal NFT #1 to Bob -> REVERT
+      await expect(
+        f.savingCore.connect(f.alice).transferFrom(f.alice.address, f.bob.address, 1)
+      ).to.be.revertedWithCustomError(f.savingCore, "TerminalCertificateNonTransferable")
         .withArgs(1n, 1);
 
-      await expect(f.savingCore.connect(f.bob).renewDeposit(1, 1))
-        .to.be.revertedWithCustomError(f.savingCore, "DepositNotActive")
+      await expect(
+        f.savingCore.connect(f.alice)["safeTransferFrom(address,address,uint256)"](f.alice.address, f.bob.address, 1)
+      ).to.be.revertedWithCustomError(f.savingCore, "TerminalCertificateNonTransferable")
         .withArgs(1n, 1);
+
+      // Certificate remains soulbound to Alice
+      expect(await f.savingCore.ownerOf(1)).to.equal(f.alice.address);
+    });
+
+    it("OWN-010b: renewed terminal NFTs (ManualRenewed and AutoRenewed) cannot be transferred", async function () {
+      const f = await networkHelpers.loadFixture(maturedDepositFixture);
+      await networkHelpers.time.setNextBlockTimestamp(f.deposit.maturityAt);
+
+      // Manual renewal: deposit 1 becomes ManualRenewed (2), successor is deposit 2
+      await (await f.savingCore.connect(f.alice).renewDeposit(1, 1)).wait();
+      expect((await f.savingCore.getDeposit(1)).status).to.equal(2);
+
+      // Alice tries to transfer old terminal certificate #1 -> REVERT
+      await expect(
+        f.savingCore.connect(f.alice).transferFrom(f.alice.address, f.bob.address, 1)
+      ).to.be.revertedWithCustomError(f.savingCore, "TerminalCertificateNonTransferable")
+        .withArgs(1n, 2);
+
+      // Old certificate #1 remains with Alice
+      expect(await f.savingCore.ownerOf(1)).to.equal(f.alice.address);
+
+      // Successor certificate #2 is Active and CAN be transferred to Bob
+      await (await f.savingCore.connect(f.alice).transferFrom(f.alice.address, f.bob.address, 2)).wait();
+      expect(await f.savingCore.ownerOf(2)).to.equal(f.bob.address);
     });
   });
 

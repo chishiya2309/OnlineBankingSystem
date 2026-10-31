@@ -60,6 +60,9 @@ export function parseTransactionError(error: any): string {
   if (lowerMsg.includes("depositnotactive")) {
     return "This deposit is no longer active (it has already been withdrawn or renewed).";
   }
+  if (lowerMsg.includes("terminalcertificatenontransferable")) {
+    return "This deposit certificate has already been settled (withdrawn or renewed) and cannot be transferred.";
+  }
   if (lowerMsg.includes("depositnotmatured")) {
     return "Deposit has not reached maturity yet. Maturity withdrawal and manual renewal require t >= maturityAt.";
   }

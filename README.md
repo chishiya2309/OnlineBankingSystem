@@ -33,7 +33,7 @@ flowchart LR
 - Admin là `VaultManager.owner()`, được Core đọc động. Chuyển ownership của Vault đồng thời đổi quyền quản trị plan; không đổi owner của NFT user.
 - [Frontend](frontend/README.md): React 18, TypeScript, Vite, ethers v6, MetaMask/EIP-1193. Portfolio tìm chứng chỉ theo `ownerOf`, không theo người gửi ban đầu.
 
-NFT không bị burn sau settlement. Status: `0 Active`, `1 Withdrawn`, `2 ManualRenewed`, `3 AutoRenewed`. Chứng chỉ terminal vẫn có thể chuyển như ERC721 nhưng không tạo quyền nhận tiền lần nữa.
+NFT không bị burn sau settlement. Status: `0 Active`, `1 Withdrawn`, `2 ManualRenewed`, `3 AutoRenewed`. Khi còn Active, NFT được chuyển nhượng tự do; sau khi settlement (terminal), chứng chỉ trở thành **Soulbound** dính chặt với chủ sở hữu làm minh chứng lịch sử và không thể chuyển nhượng (`TerminalCertificateNonTransferable`).
 
 ## Quy tắc nghiệp vụ
 
@@ -145,7 +145,7 @@ npm.cmd run seed:sepolia
 npm.cmd run verify-deploy:sepolia
 ```
 
-Force deploy giữ MockUSDC còn bytecode và tạo Vault/Core mới; không tự migrate deposit/NFT/funds cũ. Deposit cũ tiếp tục tồn tại trên địa chỉ cũ với quyền cũ; UI registry mới chỉ trỏ tới deployment mới. Local có lệnh tương ứng `deploy:localhost:force`. Đã redeploy công khai lên Sepolia ngày 29/10/2026, seed 3 plan và fund Vault mới 5.000 MockUSDC; xem [bằng chứng deployment](document/evidence/sepolia-redeploy-2026-10-29.json). Core mới: `0x69371d5829aEb695BC4b12Bd9243AF8584eb0681`; Vault mới: `0xE3D2f34cAe33D694e649c5975A4875E026bdf4c2`.
+Force deploy giữ MockUSDC còn bytecode và tạo Vault/Core mới; không tự migrate deposit/NFT/funds cũ. Deposit cũ tiếp tục tồn tại trên địa chỉ cũ với quyền cũ; UI registry mới chỉ trỏ tới deployment mới. Local có lệnh tương ứng `deploy:localhost:force`. Đã redeploy công khai lên Sepolia (bao gồm tính năng Soulbound Terminal Certificate), seed 3 plan và fund Vault mới 5.000 MockUSDC. Core mới: `0x933aDb2d629Ad16f0c37971C4D6eda04e9eEcc6E`; Vault mới: `0x004552432F71C74e1cC8E1AfD10DcC9F96D38b09`.
 
 | Biến | Công dụng và mặc định |
 | --- | --- |
@@ -195,7 +195,7 @@ E2E dùng provider EIP-1193 thử nghiệm chuyển giao dịch thật xuống H
 
 ### 1. Transferable certificate — Alice chuyển NFT cho Bob thì ai được rút?
 
-Bob được rút vì quyền tài chính thuộc **owner hiện tại**, không phải người gửi ban đầu; đoạn quyết định là `if (ownerOf(depositId) != msg.sender)` tại [SavingCore.sol dòng 339](contracts/SavingCore.sol#L339), tương tự với early withdrawal và manual renewal. Approved operator có thể chuyển NFT nhưng không trực tiếp settlement khi chưa là owner; auto-renew permissionless luôn mint successor về current owner. Thiết kế giúp chuyển nhượng quyền nhận tiền nhưng việc chuyển nhầm NFT cũng chuyển quyền rút, nên người dùng phải hiểu giá trị của certificate. Bằng chứng: `OWN-002`, `OWN-007` trong [hardening tests](test/SavingCoreHardening.ts) và browser `U06`.
+Bob được rút vì quyền tài chính thuộc **owner hiện tại**, không phải người gửi ban đầu; đoạn quyết định là `if (ownerOf(depositId) != msg.sender)` tại [SavingCore.sol dòng 339](contracts/SavingCore.sol#L339), tương tự với early withdrawal và manual renewal. Approved operator có thể chuyển NFT nhưng không trực tiếp settlement khi chưa là owner; auto-renew permissionless luôn mint successor về current owner. Thiết kế giúp chuyển nhượng quyền nhận tiền nhưng việc chuyển nhầm NFT cũng chuyển quyền rút, nên người dùng phải hiểu giá trị của certificate. Khi deposit đã tất toán hoặc tái tục, chứng chỉ trở thành soulbound cố định với chủ sở hữu và bị cấm chuyển nhượng. Bằng chứng: `OWN-002`, `OWN-007`, `OWN-010` trong [hardening tests](test/SavingCoreHardening.ts) và browser `U06`.
 
 ### 2. Empty vault — Vault thiếu tiền trả lãi thì sao?
 

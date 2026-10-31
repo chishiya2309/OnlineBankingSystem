@@ -13,8 +13,8 @@
     "chainId": 11155111,
     "contracts": {
       "MockUSDC": "0x578d4C3f5A95a6797aD8445487062b6469768a58",
-      "VaultManager": "0xE3D2f34cAe33D694e649c5975A4875E026bdf4c2",
-      "SavingCore": "0x69371d5829aEb695BC4b12Bd9243AF8584eb0681"
+      "VaultManager": "0x004552432F71C74e1cC8E1AfD10DcC9F96D38b09",
+      "SavingCore": "0x933aDb2d629Ad16f0c37971C4D6eda04e9eEcc6E"
     }
   }
 }

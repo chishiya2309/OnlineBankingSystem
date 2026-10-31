@@ -1,8 +1,8 @@
 {
   "contractName": "SavingCore",
-  "address": "0x69371d5829aEb695BC4b12Bd9243AF8584eb0681",
-  "deploymentTxHash": "0x47a0eafc0e55ea521fd50f04f5c4ff67670ed1f3ce3962de3bbc400df85f7770",
-  "blockNumber": 12020301,
+  "address": "0x933aDb2d629Ad16f0c37971C4D6eda04e9eEcc6E",
+  "deploymentTxHash": "0x1d0cbb8759bb1be02510f8686d78f2722ef18b3b069baa14837759407535d954",
+  "blockNumber": 12032730,
   "network": "sepolia",
   "chainId": 11155111,
   "abi": [
@@ -392,6 +392,22 @@
         }
       ],
       "name": "SafeERC20FailedOperation",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "depositId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "enum SavingCore.DepositStatus",
+          "name": "currentStatus",
+          "type": "uint8"
+        }
+      ],
+      "name": "TerminalCertificateNonTransferable",
       "type": "error"
     },
     {

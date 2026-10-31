@@ -90,6 +90,7 @@ contract SavingCore is ERC721, ReentrancyGuard {
     error DepositAmountOutOfRange(uint256 amount, uint256 minDeposit, uint256 maxDeposit);
     error DepositNotFound(uint256 depositId);
     error DepositNotActive(uint256 depositId, DepositStatus currentStatus);
+    error TerminalCertificateNonTransferable(uint256 depositId, DepositStatus currentStatus);
     error NotDepositOwner(uint256 depositId, address caller);
     error DepositNotMatured(uint256 depositId, uint256 maturityAt);
     error EarlyWithdrawalClosed(uint256 depositId, uint256 maturityAt);
@@ -584,5 +585,23 @@ contract SavingCore is ERC721, ReentrancyGuard {
             principal, uint256(aprBps) * tenorSeconds, SECONDS_PER_YEAR * BPS_DENOMINATOR
         );
         return principal + interest;
+    }
+
+    /// @dev Overrides ERC721 _update to enforce that certificates with terminal statuses
+    /// (Withdrawn, ManualRenewed, AutoRenewed) are non-transferable (soulbound historical certificates).
+    function _update(address to, uint256 tokenId, address auth)
+        internal
+        virtual
+        override
+        returns (address)
+    {
+        address from = super._update(to, tokenId, auth);
+        if (from != address(0) && to != address(0)) {
+            DepositStatus status = _deposits[tokenId].status;
+            if (status != DepositStatus.Active) {
+                revert TerminalCertificateNonTransferable(tokenId, status);
+            }
+        }
+        return from;
     }
 }
