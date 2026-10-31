@@ -82,7 +82,7 @@ export const App: React.FC = () => {
 
   // Default select first enabled plan
   React.useEffect(() => {
-    setSelectedPlan((previous) =>
+    setSelectedPlan((previous: SavingPlan | null) =>
       savingPlans.plans.find((plan) => plan.planId === previous?.planId && plan.enabled)
       ?? savingPlans.plans.find((plan) => plan.enabled)
       ?? null

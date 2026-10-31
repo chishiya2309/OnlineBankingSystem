@@ -1,12 +1,14 @@
 node_modules/
-artifacts/
-cache/
-coverage/
-types/
-typechain-types/
-dist/
+/artifacts/
+/cache/
+/coverage/
+/types/
+/typechain-types/
+/dist/
+/frontend/dist/
 ignition/deployments/
 .npm-cache/
+!frontend/src/types/
 
 .env
 .env.*
