@@ -67,9 +67,9 @@ export function useAdmin(
         isPaused: Boolean(isPaused),
         feeReceiver,
         vaultBalance: BigInt(rawVaultBal || 0),
-        vaultBalanceFormatted: formatUSDC(BigInt(rawVaultBal || 0)),
+        vaultBalanceFormatted: formatUSDC(BigInt(rawVaultBal || 0), "auto"),
         adminUSDCBalance: BigInt(rawAdminBal || 0),
-        adminUSDCBalanceFormatted: formatUSDC(BigInt(rawAdminBal || 0)),
+        adminUSDCBalanceFormatted: formatUSDC(BigInt(rawAdminBal || 0), "auto"),
         adminAllowance: BigInt(rawAllowance || 0),
       });
     } catch (err) {

@@ -8,6 +8,7 @@ interface AccountOverviewProps {
   planCount: number;
   isStaleDeployment: boolean;
   isMinting: boolean;
+  tokenAddress?: string | null;
   onMintDemoTokens: () => void;
 }
 
@@ -18,8 +19,28 @@ export const AccountOverview: React.FC<AccountOverviewProps> = ({
   planCount,
   isStaleDeployment,
   isMinting,
+  tokenAddress,
   onMintDemoTokens,
 }) => {
+  const handleWatchToken = async () => {
+    if (!tokenAddress || typeof window === "undefined" || !window.ethereum) return;
+    try {
+      await window.ethereum.request({
+        method: "wallet_watchAsset",
+        params: {
+          type: "ERC20",
+          options: {
+            address: tokenAddress,
+            symbol: "USDC",
+            decimals: 6,
+          },
+        },
+      });
+    } catch (err) {
+      console.warn("Could not add token to MetaMask:", err);
+    }
+  };
+
   return (
     <div>
       {isStaleDeployment && (
@@ -34,10 +55,23 @@ export const AccountOverview: React.FC<AccountOverviewProps> = ({
         <div className="overview-card">
           <div className="overview-label">Available MockUSDC Balance</div>
           <div className="overview-value tabular-num">
-            {isConnected ? formatUSDC(balance) : "0.00"} <span style={{ fontSize: "16px", color: "var(--color-muted)" }}>USDC</span>
+            {isConnected ? formatUSDC(balance, "auto") : "0.00"} <span style={{ fontSize: "16px", color: "var(--color-muted)" }}>USDC</span>
           </div>
-          <div className="overview-detail" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span>Demo ERC20 (6 Decimals)</span>
+          <div className="overview-detail" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span>Demo ERC20 (6 Decimals)</span>
+              {isConnected && tokenAddress && (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm text-nowrap"
+                  onClick={handleWatchToken}
+                  title="Import MockUSDC token into your MetaMask wallet"
+                  style={{ padding: "2px 6px", fontSize: "11px", height: "auto" }}
+                >
+                  🦊 Add to MetaMask
+                </button>
+              )}
+            </div>
             {isConnected && (
               <button
                 type="button"
@@ -55,7 +89,7 @@ export const AccountOverview: React.FC<AccountOverviewProps> = ({
         <div className="overview-card">
           <div className="overview-label">Approved Allowance (SavingCore)</div>
           <div className="overview-value tabular-num">
-            {isConnected ? formatUSDC(allowance) : "0.00"} <span style={{ fontSize: "16px", color: "var(--color-muted)" }}>USDC</span>
+            {isConnected ? formatUSDC(allowance, "auto") : "0.00"} <span style={{ fontSize: "16px", color: "var(--color-muted)" }}>USDC</span>
           </div>
           <div className="overview-detail">
             {allowance > 0n ? "Sufficient for approved deposit amount" : "Approval requested upon deposit"}

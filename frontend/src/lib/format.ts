@@ -1,18 +1,42 @@
 import { ethers } from "ethers";
 
+export type USDCDecimals = 2 | 6 | "auto";
+
 /**
- * Formats 6-decimal token units to human-readable locale string with 2 decimal places.
- * Example: 1000000000n -> "1,000.00"
+ * Formats 6-decimal token units to human-readable locale string.
+ * Supports:
+ * - 2: exactly 2 decimal places (default, backwards-compatible)
+ * - 6: exactly 6 decimal places
+ * - "auto": adaptive precision, showing full precision up to 6 decimals if sub-cent units exist,
+ *           otherwise keeping 2 clean decimal places.
+ * Examples:
+ * - 1000000000n -> "1,000.00"
+ * - 4500000214n with "auto" -> "4,500.000214"
  */
-export function formatUSDC(rawUnits: bigint | string | number | undefined | null, decimals: 2 | 6 = 2): string {
-  const zero = `0.${"0".repeat(decimals)}`;
+export function formatUSDC(
+  rawUnits: bigint | string | number | undefined | null,
+  decimals: USDCDecimals = 2
+): string {
+  const zero = decimals === 6 ? "0.000000" : "0.00";
   if (rawUnits === undefined || rawUnits === null) return zero;
   try {
     const rawBigInt = typeof rawUnits === "bigint" ? rawUnits : BigInt(rawUnits.toString());
     const formatted = ethers.formatUnits(rawBigInt, 6);
-    const parts = formatted.split(".");
-    const whole = BigInt(parts[0]).toLocaleString("en-US");
-    const decimal = (parts[1] || "").padEnd(decimals, "0").slice(0, decimals);
+    const [wholePart, fracPart = ""] = formatted.split(".");
+    const whole = BigInt(wholePart).toLocaleString("en-US");
+
+    if (decimals === "auto") {
+      const padded = fracPart.padEnd(6, "0");
+      if (rawBigInt % 10000n !== 0n) {
+        // Has sub-cent units (non-zero beyond the second decimal)
+        const trimmed = padded.replace(/0+$/, "");
+        const finalFrac = trimmed.length < 2 ? trimmed.padEnd(2, "0") : trimmed;
+        return `${whole}.${finalFrac}`;
+      }
+      return `${whole}.${padded.slice(0, 2)}`;
+    }
+
+    const decimal = fracPart.padEnd(decimals, "0").slice(0, decimals);
     return `${whole}.${decimal}`;
   } catch {
     return zero;

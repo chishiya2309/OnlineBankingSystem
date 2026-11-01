@@ -163,7 +163,7 @@ export async function fetchUserPortfolio(
         depositId,
         planId,
         principal,
-        principalFormatted: formatUSDC(principal),
+        principalFormatted: formatUSDC(principal, "auto"),
         startAt,
         maturityAt,
         aprBpsAtOpen,
@@ -171,13 +171,13 @@ export async function fetchUserPortfolio(
         status,
         owner: account,
         accruedInterest,
-        accruedInterestFormatted: formatUSDC(accruedInterest, tenorSeconds < 86400 ? 6 : 2),
+        accruedInterestFormatted: formatUSDC(accruedInterest, "auto"),
         earlyPenalty,
-        earlyPenaltyFormatted: formatUSDC(earlyPenalty),
+        earlyPenaltyFormatted: formatUSDC(earlyPenalty, "auto"),
         maturityPayout,
-        maturityPayoutFormatted: formatUSDC(maturityPayout, tenorSeconds < 86400 ? 6 : 2),
+        maturityPayoutFormatted: formatUSDC(maturityPayout, "auto"),
         earlyPayout,
-        earlyPayoutFormatted: formatUSDC(earlyPayout),
+        earlyPayoutFormatted: formatUSDC(earlyPayout, "auto"),
         tenorSeconds,
         gracePeriodSeconds,
         graceEnd,
@@ -216,12 +216,12 @@ export async function fetchUserPortfolio(
 
   const summary: PortfolioSummary = {
     totalActivePrincipal,
-    totalActivePrincipalFormatted: formatUSDC(totalActivePrincipal),
+    totalActivePrincipalFormatted: formatUSDC(totalActivePrincipal, "auto"),
     activeCount: activeDeposits.length,
     historicalCount: historicalDeposits.length,
     upcomingMaturity,
     totalEstimatedInterest,
-    totalEstimatedInterestFormatted: formatUSDC(totalEstimatedInterest),
+    totalEstimatedInterestFormatted: formatUSDC(totalEstimatedInterest, "auto"),
   };
 
   return {

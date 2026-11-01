@@ -122,6 +122,7 @@ export const App: React.FC = () => {
             planCount={savingPlans.plans.length}
             isStaleDeployment={contracts.isStaleDeployment}
             isMinting={depositFlow.isMinting}
+            tokenAddress={contracts.addresses?.MockUSDC}
             onMintDemoTokens={depositFlow.mintDemoTokens}
           />
 

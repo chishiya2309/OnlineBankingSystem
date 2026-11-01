@@ -62,7 +62,7 @@ export const DepositForm: React.FC<DepositFormProps> = ({
     try {
       const parsed = parseUSDC(val);
       if (parsed > balance) {
-        setValidationError(`Amount exceeds available balance (${formatUSDC(balance)} USDC).`);
+        setValidationError(`Amount exceeds available balance (${formatUSDC(balance, "auto")} USDC).`);
       } else if (selectedPlan) {
         if (selectedPlan.minDeposit > 0n && parsed < selectedPlan.minDeposit) {
           setValidationError(`Minimum deposit for this plan is ${selectedPlan.minDepositFormatted}.`);
@@ -145,7 +145,7 @@ export const DepositForm: React.FC<DepositFormProps> = ({
             <div className="form-label">
               <span>Deposit Principal</span>
               <span className="tabular-num">
-                Balance: {formatUSDC(balance)} USDC
+                Balance: {formatUSDC(balance, "auto")} USDC
               </span>
             </div>
 
@@ -231,8 +231,8 @@ export const DepositForm: React.FC<DepositFormProps> = ({
                 {isPending
                   ? statusMessage || "Processing Transaction..."
                   : !hasSufficientAllowance
-                  ? `Step 1/2: Approve ${formatUSDC(parsedAmount)} MockUSDC`
-                  : `Step 2/2: Open Deposit (${formatUSDC(parsedAmount)} USDC)`}
+                  ? `Step 1/2: Approve ${formatUSDC(parsedAmount, "auto")} MockUSDC`
+                  : `Step 2/2: Open Deposit (${formatUSDC(parsedAmount, "auto")} USDC)`}
               </button>
 
               {statusMessage && (

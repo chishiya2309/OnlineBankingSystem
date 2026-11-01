@@ -19,6 +19,18 @@ describe("Token & Financial Formatters (FE-005, FE-006)", () => {
     expect(formatUSDC(0n)).toBe("0.00");
   });
 
+  it("FE-005b: formats with adaptive precision ('auto') preserving sub-cent units", () => {
+    // Whole cent values keep 2 clean decimal places
+    expect(formatUSDC(1000000000n, "auto")).toBe("1,000.00");
+    expect(formatUSDC(4500000000n, "auto")).toBe("4,500.00");
+    expect(formatUSDC(500500000n, "auto")).toBe("500.50");
+    // Sub-cent values (e.g. from short tenor interest payouts) preserve full precision
+    expect(formatUSDC(4500000214n, "auto")).toBe("4,500.000214");
+    expect(formatUSDC(214n, "auto")).toBe("0.000214");
+    expect(formatUSDC(500123400n, "auto")).toBe("500.1234");
+    expect(formatUSDC(0n, "auto")).toBe("0.00");
+  });
+
   it("FE-005: parses input string with exact 6 decimals precision without float loss", () => {
     expect(parseUSDC("1000")).toBe(1000000000n);
     expect(parseUSDC("500.5")).toBe(500500000n);
