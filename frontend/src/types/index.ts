@@ -53,6 +53,7 @@ export interface DepositRecord {
   // Renewal lineage
   renewedFromDepositId?: number;
   renewedToDepositId?: number;
+  renewalType?: "manual" | "auto";
 }
 
 export interface PortfolioSummary {

@@ -62,8 +62,27 @@ export const DepositCard: React.FC<DepositCardProps> = ({
         </div>
 
         {deposit.renewedFromDepositId && (
-          <span className="lineage-badge text-nowrap" title={`Lineage: Renewed from #${deposit.renewedFromDepositId}`}>
-            From #{deposit.renewedFromDepositId}
+          <span
+            className={`lineage-badge text-nowrap ${
+              deposit.renewalType === "auto"
+                ? "lineage-auto"
+                : deposit.renewalType === "manual"
+                ? "lineage-manual"
+                : ""
+            }`}
+            title={
+              deposit.renewalType === "auto"
+                ? `Auto-Renewed from #${deposit.renewedFromDepositId} after grace period (Original APR & tenor locked)`
+                : deposit.renewalType === "manual"
+                ? `Manually Renewed from #${deposit.renewedFromDepositId} (Compounded principal in chosen Plan #${deposit.planId})`
+                : `Lineage: Renewed from #${deposit.renewedFromDepositId}`
+            }
+          >
+            {deposit.renewalType === "auto"
+              ? `From #${deposit.renewedFromDepositId} (Auto Renew)`
+              : deposit.renewalType === "manual"
+              ? `From #${deposit.renewedFromDepositId} (Manual Renew)`
+              : `From #${deposit.renewedFromDepositId}`}
           </span>
         )}
         {deposit.renewedToDepositId && (

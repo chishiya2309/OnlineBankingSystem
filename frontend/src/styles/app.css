@@ -774,6 +774,20 @@
   color: var(--color-muted);
 }
 
+.lineage-badge.lineage-manual {
+  border-color: rgba(60, 180, 120, 0.4);
+  color: var(--color-accent);
+  background: rgba(60, 180, 120, 0.08);
+  font-weight: 500;
+}
+
+.lineage-badge.lineage-auto {
+  border-color: rgba(220, 130, 40, 0.4);
+  color: var(--color-accent-2);
+  background: rgba(220, 130, 40, 0.08);
+  font-weight: 500;
+}
+
 .deposit-principal-row {
   display: flex;
   justify-content: space-between;

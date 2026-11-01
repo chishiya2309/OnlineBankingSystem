@@ -196,6 +196,45 @@ describe("Portfolio Discovery & Accounting Tests (PF-001 to PF-008)", () => {
 
     expect(oldDeposit?.renewedToDepositId).toBe(2);
     expect(newDeposit?.renewedFromDepositId).toBe(1);
+    expect(newDeposit?.renewalType).toBe("manual");
+  });
+
+  it("PF-006b: distinguishes auto-renewed successor from manual-renewed successor", async () => {
+    const mockSavingCore = {
+      depositCount: vi.fn().mockResolvedValue(2n),
+      gracePeriodSeconds: vi.fn().mockResolvedValue(172800n),
+      filters: { Renewed: vi.fn().mockReturnValue({}) },
+      queryFilter: vi.fn().mockResolvedValue([
+        {
+          args: {
+            oldDepositId: 1n,
+            newDepositId: 2n,
+            newPrincipal: 1010000000n,
+            newPlanId: 1n,
+          },
+        },
+      ]),
+      ownerOf: vi.fn().mockResolvedValue(aliceAddress),
+      getDeposit: vi.fn().mockImplementation((id: number) => {
+        return Promise.resolve({
+          planId: 1n,
+          principal: id === 1 ? 1000000000n : 1010000000n,
+          startAt: 1690000000n,
+          maturityAt: 1705000000n,
+          aprBpsAtOpen: 200,
+          penaltyBpsAtOpen: 350,
+          status: BigInt(id === 1 ? DepositStatus.AutoRenewed : DepositStatus.Active),
+        });
+      }),
+    } as any;
+
+    const result = await fetchUserPortfolio(mockSavingCore, aliceAddress, mockProvider);
+    const oldDeposit = result.historicalDeposits.find((d) => d.depositId === 1);
+    const newDeposit = result.activeDeposits.find((d) => d.depositId === 2);
+
+    expect(oldDeposit?.status).toBe(DepositStatus.AutoRenewed);
+    expect(newDeposit?.renewedFromDepositId).toBe(1);
+    expect(newDeposit?.renewalType).toBe("auto");
   });
 
   it("PF-008: handles RPC partial query errors gracefully without dropping existing records", async () => {

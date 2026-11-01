@@ -79,10 +79,35 @@ export const DepositDetailModal: React.FC<DepositDetailModalProps> = ({
             <span className="detail-value tabular-num">Plan #{deposit.planId}</span>
           </div>
           {deposit.renewedFromDepositId && (
-            <div className="detail-row">
-              <span className="detail-label">Renewal Predecessor</span>
-              <span className="detail-value tabular-num">Rolled over from Certificate #{deposit.renewedFromDepositId}</span>
-            </div>
+            <>
+              <div className="detail-row">
+                <span className="detail-label">Renewal Predecessor</span>
+                <span className="detail-value tabular-num">
+                  Rolled over from Certificate #{deposit.renewedFromDepositId}
+                  {deposit.renewalType === "auto"
+                    ? " (Auto-Renewal)"
+                    : deposit.renewalType === "manual"
+                    ? " (Manual Renewal)"
+                    : ""}
+                </span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Renewal Origin &amp; Terms</span>
+                <span
+                  className="detail-value"
+                  style={{
+                    color: deposit.renewalType === "auto" ? "var(--color-accent-2)" : "var(--color-accent)",
+                    fontWeight: 500,
+                  }}
+                >
+                  {deposit.renewalType === "auto"
+                    ? `Auto-renewed after grace period ended. Original terms locked (${formatBps(deposit.aprBpsAtOpen)} APR snapshot & ${deposit.tenorSeconds}s tenor preserved).`
+                    : deposit.renewalType === "manual"
+                    ? `Manually renewed by certificate owner upon maturity into current Plan #${deposit.planId}.`
+                    : "Rolled over from earlier deposit."}
+                </span>
+              </div>
+            </>
           )}
           {deposit.renewedToDepositId && (
             <div className="detail-row">

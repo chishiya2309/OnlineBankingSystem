@@ -193,6 +193,34 @@ export async function fetchUserPortfolio(
     })
   );
 
+  // 4b. Resolve renewalType ("manual" | "auto") for successor deposits by inspecting predecessor status
+  const depositMap = new Map<number, DepositRecord>();
+  for (const d of deposits) {
+    depositMap.set(d.depositId, d);
+  }
+
+  await Promise.all(
+    deposits.map(async (d) => {
+      if (d.renewedFromDepositId) {
+        const predecessor = depositMap.get(d.renewedFromDepositId);
+        let oldStatus: DepositStatus | null = predecessor ? predecessor.status : null;
+        if (oldStatus === null && savingCore) {
+          try {
+            const oldRaw = await savingCore.getDeposit(d.renewedFromDepositId);
+            oldStatus = Number(oldRaw.status) as DepositStatus;
+          } catch {
+            oldStatus = null;
+          }
+        }
+        if (oldStatus === DepositStatus.ManualRenewed) {
+          d.renewalType = "manual";
+        } else if (oldStatus === DepositStatus.AutoRenewed) {
+          d.renewalType = "auto";
+        }
+      }
+    })
+  );
+
   // 5. Partition into Active and Historical certificates
   const activeDeposits = deposits
     .filter((d) => d.status === DepositStatus.Active)
