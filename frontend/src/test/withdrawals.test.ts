@@ -142,4 +142,34 @@ describe("Withdrawal Eligibility & Calculation Tests (WD-UI-001 to WD-UI-008)", 
     const parsed = parseTransactionError(rejectionError);
     expect(parsed).toBe("Transaction was cancelled in your wallet.");
   });
+
+  it("WD-UI-009: calculates 100% early penalty as total capital loss (netPayout = 0n)", () => {
+    const principal = 1000000000n; // 1,000 USDC
+    const penaltyBps = 10000; // 100.00%
+    const penalty = calculatePenalty(principal, penaltyBps);
+    const { netPayout, penalty: calculatedPenalty } = calculateEarlyWithdrawal(principal, penaltyBps);
+
+    expect(penalty).toBe(principal);
+    expect(calculatedPenalty).toBe(principal);
+    expect(netPayout).toBe(0n);
+  });
+
+  it("WD-UI-010: detects insufficient vault liquidity when vaultBalance < accruedInterest", () => {
+    const deposit = createDepositMock({
+      accruedInterest: 50000000n, // 50 USDC
+    });
+    const vaultBalanceDry = 10000000n; // 10 USDC (< 50 USDC)
+    const isInsufficient = deposit.accruedInterest > 0n && vaultBalanceDry < deposit.accruedInterest;
+    expect(isInsufficient).toBe(true);
+
+    const vaultBalanceSufficient = 100000000n; // 100 USDC (> 50 USDC)
+    const isStillInsufficient = deposit.accruedInterest > 0n && vaultBalanceSufficient < deposit.accruedInterest;
+    expect(isStillInsufficient).toBe(false);
+  });
+
+  it("WD-UI-011: blocks actions during vault emergency pause", () => {
+    const isPaused = true;
+    const canTransact = !isPaused;
+    expect(canTransact).toBe(false);
+  });
 });

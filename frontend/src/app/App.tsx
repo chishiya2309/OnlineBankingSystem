@@ -6,6 +6,7 @@ import { useDepositFlow } from "../hooks/useDepositFlow";
 import { usePortfolio } from "../hooks/usePortfolio";
 import { useWithdraw } from "../hooks/useWithdraw";
 import { useRenewal } from "../hooks/useRenewal";
+import { useVaultStatus } from "../hooks/useVaultStatus";
 import type { SavingPlan, DepositRecord } from "../types";
 
 import { Header } from "../components/layout/Header";
@@ -31,11 +32,17 @@ export const App: React.FC = () => {
   const wallet = useWallet();
   const contracts = useContracts(wallet.chainId, wallet.signer, wallet.browserProvider);
   const savingPlans = useSavingPlans(contracts.savingCore, contracts.isStaleDeployment);
+  const vaultStatus = useVaultStatus(
+    contracts.vaultManager,
+    contracts.mockUSDC,
+    contracts.addresses?.VaultManager ?? null
+  );
   const depositFlow = useDepositFlow(
     wallet.account,
     contracts.mockUSDC,
     contracts.savingCore,
-    contracts.addresses?.SavingCore ?? null
+    contracts.addresses?.SavingCore ?? null,
+    contracts.vaultManager
   );
 
   const portfolio = usePortfolio(
@@ -48,16 +55,30 @@ export const App: React.FC = () => {
   const handleActionSuccess = useCallback(() => {
     portfolio.refetch();
     depositFlow.refreshBalances();
-  }, [portfolio, depositFlow]);
+    vaultStatus.refreshVaultStatus();
+  }, [portfolio, depositFlow, vaultStatus]);
 
   const handleAdminSuccess = useCallback(() => {
     savingPlans.refetch();
     depositFlow.refreshBalances();
     portfolio.refetch();
-  }, [savingPlans, depositFlow, portfolio]);
+    vaultStatus.refreshVaultStatus();
+  }, [savingPlans, depositFlow, portfolio, vaultStatus]);
 
-  const withdraw = useWithdraw(contracts.savingCore, wallet.account, handleActionSuccess);
-  const renewal = useRenewal(contracts.savingCore, wallet.account, handleActionSuccess);
+  const withdraw = useWithdraw(
+    contracts.savingCore,
+    wallet.account,
+    handleActionSuccess,
+    contracts.vaultManager,
+    contracts.mockUSDC
+  );
+  const renewal = useRenewal(
+    contracts.savingCore,
+    wallet.account,
+    handleActionSuccess,
+    contracts.vaultManager,
+    contracts.mockUSDC
+  );
   const admin = useAdmin(
     contracts.vaultManager,
     contracts.savingCore,
@@ -147,6 +168,15 @@ export const App: React.FC = () => {
             onMintDemoTokens={depositFlow.mintDemoTokens}
           />
 
+          {/* Emergency Pause Global Notification */}
+          {vaultStatus.isPaused && (
+            <div className="alert-banner warning" role="alert" style={{ marginBottom: "20px" }}>
+              <div>
+                <strong>⚠️ Emergency Pause In Effect:</strong> The banking vault is currently paused by Bank Admin. All deposit, withdrawal, and renewal operations are temporarily halted for security.
+              </div>
+            </div>
+          )}
+
           {/* Global Alert Notification */}
           {(wallet.error || depositFlow.error || portfolio.error) && (
             <div className="alert-banner error" role="alert" style={{ marginBottom: "28px" }}>
@@ -178,6 +208,7 @@ export const App: React.FC = () => {
                     onApprove={depositFlow.approve}
                     onOpenDeposit={handleOpenDeposit}
                     onSwitchNetwork={(targetId) => wallet.switchNetwork(targetId)}
+                    isPaused={vaultStatus.isPaused}
                   />
                 </div>
 
@@ -282,6 +313,9 @@ export const App: React.FC = () => {
           onManualRenew={(d) => setManualRenewDeposit(d)}
           onAutoRenew={(d) => setAutoRenewDeposit(d)}
           onSelectDeposit={handleSelectDepositById}
+          chainId={wallet.chainId}
+          isPaused={vaultStatus.isPaused}
+          vaultBalance={vaultStatus.vaultBalance}
         />
       )}
 
@@ -290,6 +324,8 @@ export const App: React.FC = () => {
           deposit={withdrawDeposit}
           withdrawState={withdraw}
           onClose={() => setWithdrawDeposit(null)}
+          isPaused={vaultStatus.isPaused}
+          vaultBalance={vaultStatus.vaultBalance}
         />
       )}
 
@@ -299,6 +335,8 @@ export const App: React.FC = () => {
           savingPlans={savingPlans.plans}
           renewalState={renewal}
           onClose={() => setManualRenewDeposit(null)}
+          isPaused={vaultStatus.isPaused}
+          vaultBalance={vaultStatus.vaultBalance}
         />
       )}
 
@@ -307,6 +345,8 @@ export const App: React.FC = () => {
           deposit={autoRenewDeposit}
           renewalState={renewal}
           onClose={() => setAutoRenewDeposit(null)}
+          isPaused={vaultStatus.isPaused}
+          vaultBalance={vaultStatus.vaultBalance}
         />
       )}
 

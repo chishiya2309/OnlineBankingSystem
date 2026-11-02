@@ -14,6 +14,7 @@ interface DepositFormProps {
   onApprove: (plan: SavingPlan, amountStr: string) => Promise<boolean>;
   onOpenDeposit: (plan: SavingPlan, amountStr: string) => Promise<boolean>;
   onSwitchNetwork?: (chainId: number) => void;
+  isPaused?: boolean;
 }
 
 export const DepositForm: React.FC<DepositFormProps> = ({
@@ -27,6 +28,7 @@ export const DepositForm: React.FC<DepositFormProps> = ({
   onApprove,
   onOpenDeposit,
   onSwitchNetwork,
+  isPaused = false,
 }) => {
   const [amountStr, setAmountStr] = useState<string>("500.00");
   const [hasEditedAmount, setHasEditedAmount] = useState(false);
@@ -230,6 +232,12 @@ export const DepositForm: React.FC<DepositFormProps> = ({
                 </button>
               </div>
             </div>
+          ) : isPaused ? (
+            <div className="alert-banner warning" style={{ textAlign: "center", padding: "14px" }}>
+              <div>
+                <strong>Vault Emergency Paused:</strong> All new deposits are temporarily halted by Bank Admin.
+              </div>
+            </div>
           ) : (
             <div>
               <button
@@ -238,6 +246,7 @@ export const DepositForm: React.FC<DepositFormProps> = ({
                 onClick={handleAction}
                 disabled={
                   isPending ||
+                  isPaused ||
                   parsedAmount <= 0n ||
                   parsedAmount > balance ||
                   Boolean(validationError)

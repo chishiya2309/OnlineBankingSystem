@@ -228,70 +228,77 @@ export async function fetchUserPortfolio(
     };
   }
 
-  // 4. Retrieve getDeposit data for all owned deposits
-  const deposits: DepositRecord[] = await Promise.all(
-    ownedIds.map(async (depositId) => {
-      const raw = await savingCore.getDeposit(depositId);
-      const planId = Number(raw.planId);
-      const principal = BigInt(raw.principal);
-      const startAt = Number(raw.startAt);
-      const maturityAt = Number(raw.maturityAt);
-      const aprBpsAtOpen = Number(raw.aprBpsAtOpen);
-      const penaltyBpsAtOpen = Number(raw.penaltyBpsAtOpen);
-      const status = Number(raw.status) as DepositStatus;
+  // 4. Retrieve getDeposit data for all owned deposits (with per-item fault tolerance)
+  const depositResults = await Promise.all(
+    ownedIds.map(async (depositId): Promise<DepositRecord | null> => {
+      try {
+        const raw = await savingCore.getDeposit(depositId);
+        const planId = Number(raw.planId);
+        const principal = BigInt(raw.principal);
+        const startAt = Number(raw.startAt);
+        const maturityAt = Number(raw.maturityAt);
+        const aprBpsAtOpen = Number(raw.aprBpsAtOpen);
+        const penaltyBpsAtOpen = Number(raw.penaltyBpsAtOpen);
+        const status = Number(raw.status) as DepositStatus;
 
-      const tenorSeconds = maturityAt - startAt;
-      const graceEnd = maturityAt + gracePeriodSeconds;
+        const tenorSeconds = maturityAt - startAt;
+        const graceEnd = maturityAt + gracePeriodSeconds;
 
-      // Contractual interest & penalty
-      const accruedInterest = calculateInterestFromSeconds(principal, aprBpsAtOpen, tenorSeconds);
-      const earlyPenalty = calculatePenalty(principal, penaltyBpsAtOpen);
-      const maturityPayout = calculateMaturityPayout(principal, accruedInterest);
-      const { netPayout: earlyPayout } = calculateEarlyWithdrawal(principal, penaltyBpsAtOpen);
+        // Contractual interest & penalty
+        const accruedInterest = calculateInterestFromSeconds(principal, aprBpsAtOpen, tenorSeconds);
+        const earlyPenalty = calculatePenalty(principal, penaltyBpsAtOpen);
+        const maturityPayout = calculateMaturityPayout(principal, accruedInterest);
+        const { netPayout: earlyPayout } = calculateEarlyWithdrawal(principal, penaltyBpsAtOpen);
 
-      // Eligibility using on-chain block timestamp
-      const isMatured = blockTimestamp >= maturityAt;
-      const isGraceEnded = blockTimestamp >= graceEnd;
-      const isActive = status === DepositStatus.Active;
+        // Eligibility using on-chain block timestamp
+        const isMatured = blockTimestamp >= maturityAt;
+        const isGraceEnded = blockTimestamp >= graceEnd;
+        const isActive = status === DepositStatus.Active;
 
-      const canEarlyWithdraw = isActive && !isMatured;
-      const canMaturityWithdraw = isActive && isMatured;
-      const canManualRenew = isActive && isMatured;
-      const canAutoRenew = isActive && isGraceEnded;
+        const canEarlyWithdraw = isActive && !isMatured;
+        const canMaturityWithdraw = isActive && isMatured;
+        const canManualRenew = isActive && isMatured;
+        const canAutoRenew = isActive && isGraceEnded;
 
-      return {
-        depositId,
-        planId,
-        principal,
-        principalFormatted: formatUSDC(principal, "auto"),
-        startAt,
-        maturityAt,
-        aprBpsAtOpen,
-        penaltyBpsAtOpen,
-        status,
-        owner: account,
-        accruedInterest,
-        accruedInterestFormatted: formatUSDC(accruedInterest, "auto"),
-        earlyPenalty,
-        earlyPenaltyFormatted: formatUSDC(earlyPenalty, "auto"),
-        maturityPayout,
-        maturityPayoutFormatted: formatUSDC(maturityPayout, "auto"),
-        earlyPayout,
-        earlyPayoutFormatted: formatUSDC(earlyPayout, "auto"),
-        tenorSeconds,
-        gracePeriodSeconds,
-        graceEnd,
-        isMatured,
-        isGraceEnded,
-        canEarlyWithdraw,
-        canMaturityWithdraw,
-        canManualRenew,
-        canAutoRenew,
-        renewedFromDepositId: renewedFromMap.get(depositId),
-        renewedToDepositId: renewedToMap.get(depositId),
-      };
+        return {
+          depositId,
+          planId,
+          principal,
+          principalFormatted: formatUSDC(principal, "auto"),
+          startAt,
+          maturityAt,
+          aprBpsAtOpen,
+          penaltyBpsAtOpen,
+          status,
+          owner: account,
+          accruedInterest,
+          accruedInterestFormatted: formatUSDC(accruedInterest, "auto"),
+          earlyPenalty,
+          earlyPenaltyFormatted: formatUSDC(earlyPenalty, "auto"),
+          maturityPayout,
+          maturityPayoutFormatted: formatUSDC(maturityPayout, "auto"),
+          earlyPayout,
+          earlyPayoutFormatted: formatUSDC(earlyPayout, "auto"),
+          tenorSeconds,
+          gracePeriodSeconds,
+          graceEnd,
+          isMatured,
+          isGraceEnded,
+          canEarlyWithdraw,
+          canMaturityWithdraw,
+          canManualRenew,
+          canAutoRenew,
+          renewedFromDepositId: renewedFromMap.get(depositId),
+          renewedToDepositId: renewedToMap.get(depositId),
+        };
+      } catch (depositErr) {
+        console.warn(`Failed to fetch deposit #${depositId} on-chain (RPC glitch/timeout):`, depositErr);
+        return null;
+      }
     })
   );
+
+  const deposits: DepositRecord[] = depositResults.filter((d): d is DepositRecord => d !== null);
 
   // 4b. Resolve renewalType ("manual" | "auto") and predecessor/successor summaries
   const depositMap = new Map<number, DepositRecord>();

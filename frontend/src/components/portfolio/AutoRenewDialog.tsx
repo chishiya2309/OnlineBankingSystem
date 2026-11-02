@@ -8,12 +8,16 @@ interface AutoRenewDialogProps {
   deposit: DepositRecord | null;
   renewalState: UseRenewalState;
   onClose: () => void;
+  isPaused?: boolean;
+  vaultBalance?: bigint;
 }
 
 export const AutoRenewDialog: React.FC<AutoRenewDialogProps> = ({
   deposit,
   renewalState,
   onClose,
+  isPaused = false,
+  vaultBalance,
 }) => {
   if (!deposit) return null;
 
@@ -27,6 +31,10 @@ export const AutoRenewDialog: React.FC<AutoRenewDialogProps> = ({
   } = renewalState;
 
   const compoundedPrincipal = deposit.principal + deposit.accruedInterest;
+  const isInsufficientLiquidity =
+    deposit.accruedInterest > 0n &&
+    vaultBalance !== undefined &&
+    vaultBalance < deposit.accruedInterest;
   const isExecuting = status === "validating" || status === "awaiting-signature" || status === "pending";
 
   const handleConfirm = async () => {
@@ -137,6 +145,24 @@ export const AutoRenewDialog: React.FC<AutoRenewDialogProps> = ({
               )}
             </div>
 
+            {/* Emergency Pause Warning */}
+            {isPaused && (
+              <div className="alert-banner warning" style={{ marginBottom: "20px" }}>
+                <div>
+                  <strong>Vault Emergency Paused:</strong> Auto-renewals cannot be processed while the banking vault is paused by Bank Admin.
+                </div>
+              </div>
+            )}
+
+            {/* Insufficient Vault Liquidity Warning */}
+            {isInsufficientLiquidity && (
+              <div className="alert-banner warning" style={{ marginBottom: "20px" }}>
+                <div>
+                  <strong>Insufficient Bank Vault Liquidity:</strong> The bank vault currently holds {formatUSDC(vaultBalance, "auto")} USDC, which is insufficient to compound this certificate's accrued interest ({deposit.accruedInterestFormatted} USDC). Please contact bank administration to replenish the vault before executing auto-renewal.
+                </div>
+              </div>
+            )}
+
             {/* Terms locked display */}
             <div className="detail-section glass-panel" style={{ padding: "16px", marginBottom: "20px" }}>
               <div className="detail-row">
@@ -216,7 +242,7 @@ export const AutoRenewDialog: React.FC<AutoRenewDialogProps> = ({
                 type="button"
                 className="btn btn-primary text-nowrap"
                 onClick={handleConfirm}
-                disabled={isExecuting}
+                disabled={isExecuting || isPaused || isInsufficientLiquidity}
                 style={{ whiteSpace: "nowrap" }}
               >
                 {isExecuting ? "Executing Auto Renewal…" : "Trigger Auto Renewal"}

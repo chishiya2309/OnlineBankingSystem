@@ -12,6 +12,9 @@ interface DepositDetailModalProps {
   onManualRenew: (deposit: DepositRecord) => void;
   onAutoRenew: (deposit: DepositRecord) => void;
   onSelectDeposit?: (depositId: number) => void;
+  chainId?: number | null;
+  isPaused?: boolean;
+  vaultBalance?: bigint;
 }
 
 export const DepositDetailModal: React.FC<DepositDetailModalProps> = ({
@@ -23,10 +26,17 @@ export const DepositDetailModal: React.FC<DepositDetailModalProps> = ({
   onManualRenew,
   onAutoRenew,
   onSelectDeposit,
+  chainId,
+  isPaused = false,
+  vaultBalance,
 }) => {
   if (!deposit) return null;
 
   const isActive = deposit.status === DepositStatus.Active;
+  const isInsufficientLiquidity =
+    deposit.accruedInterest > 0n &&
+    vaultBalance !== undefined &&
+    vaultBalance < deposit.accruedInterest;
 
   return (
     <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
@@ -317,6 +327,24 @@ export const DepositDetailModal: React.FC<DepositDetailModalProps> = ({
           </div>
         </div>
 
+        {/* Emergency Pause Warning */}
+        {isPaused && (
+          <div className="alert-banner warning" style={{ marginBottom: "16px" }}>
+            <div>
+              <strong>Vault Emergency Paused:</strong> All withdrawals and renewals are temporarily halted by Bank Admin.
+            </div>
+          </div>
+        )}
+
+        {/* Insufficient Vault Liquidity Warning */}
+        {isInsufficientLiquidity && (
+          <div className="alert-banner warning" style={{ marginBottom: "16px" }}>
+            <div>
+              <strong>Insufficient Bank Vault Liquidity:</strong> The bank vault has insufficient liquidity to pay this certificate's interest of {deposit.accruedInterestFormatted} USDC.
+            </div>
+          </div>
+        )}
+
         {/* Modal Action Buttons */}
         <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", flexWrap: "wrap" }}>
           <button
@@ -338,6 +366,7 @@ export const DepositDetailModal: React.FC<DepositDetailModalProps> = ({
                     onClose();
                     onWithdraw(deposit);
                   }}
+                  disabled={isPaused}
                   style={{ whiteSpace: "nowrap" }}
                 >
                   Withdraw Early
@@ -352,6 +381,7 @@ export const DepositDetailModal: React.FC<DepositDetailModalProps> = ({
                     onClose();
                     onWithdraw(deposit);
                   }}
+                  disabled={isPaused || isInsufficientLiquidity}
                   style={{ whiteSpace: "nowrap" }}
                 >
                   Withdraw at Maturity
@@ -366,6 +396,7 @@ export const DepositDetailModal: React.FC<DepositDetailModalProps> = ({
                     onClose();
                     onManualRenew(deposit);
                   }}
+                  disabled={isPaused || isInsufficientLiquidity}
                   style={{ whiteSpace: "nowrap" }}
                 >
                   Manual Renew
@@ -380,6 +411,7 @@ export const DepositDetailModal: React.FC<DepositDetailModalProps> = ({
                     onClose();
                     onAutoRenew(deposit);
                   }}
+                  disabled={isPaused || isInsufficientLiquidity}
                   style={{ whiteSpace: "nowrap", borderColor: "var(--color-accent-2)", color: "var(--color-accent-2)" }}
                 >
                   Trigger Auto Renew
@@ -391,7 +423,15 @@ export const DepositDetailModal: React.FC<DepositDetailModalProps> = ({
 
         {isActive && !deposit.isMatured && (
           <div style={{ marginTop: "14px", padding: "10px 14px", background: "var(--color-accent-soft)", borderRadius: "8px", fontSize: "12px", color: "var(--color-muted)", border: "1px dashed var(--color-border)" }}>
-            <strong>Testing Tip:</strong> Bank administrators can create a short-duration plan in the <strong>Admin Portal</strong>. The term of an open deposit stays fixed.
+            {chainId === 31337 ? (
+              <>
+                <strong>💡 Localhost Testing Tip:</strong> On Hardhat local node, bank administrators can advance block timestamps or create short-duration plans in the <strong>Admin Portal</strong>.
+              </>
+            ) : (
+              <>
+                <strong>💡 Sepolia Testing Notice:</strong> Block time advances in real-time (1s = 1s). Fast-forwarding block time is not supported on live Ethereum testnets; to test maturity quickly, administrators can create short-duration plans (e.g. 60s) via the <strong>Admin Portal</strong>.
+              </>
+            )}
           </div>
         )}
       </div>

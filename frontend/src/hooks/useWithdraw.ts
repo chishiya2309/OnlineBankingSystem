@@ -21,7 +21,9 @@ export interface UseWithdrawState {
 export function useWithdraw(
   savingCore: ethers.Contract | null,
   account: string | null,
-  onSuccess?: () => void
+  onSuccess?: () => void,
+  vaultManager?: ethers.Contract | null,
+  mockUSDC?: ethers.Contract | null
 ): UseWithdrawState {
   const [status, setStatus] = useState<WithdrawFlowStatus>("idle");
   const [statusMessage, setStatusMessage] = useState<string>("");
@@ -49,6 +51,13 @@ export function useWithdraw(
 
       try {
         // Preflight validations
+        if (vaultManager) {
+          const isPaused = await vaultManager.paused().catch(() => false);
+          if (isPaused) {
+            throw new Error("Action rejected: The banking vault is currently paused by Bank Admin.");
+          }
+        }
+
         const currentOwner = await savingCore.ownerOf(deposit.depositId);
         if (currentOwner.toLowerCase() !== account.toLowerCase()) {
           throw new Error("Action rejected: Only the current owner of this deposit NFT certificate can perform early withdrawal.");
@@ -111,7 +120,7 @@ export function useWithdraw(
         return false;
       }
     },
-    [savingCore, account, onSuccess]
+    [savingCore, account, onSuccess, vaultManager]
   );
 
   const withdrawAtMaturity = useCallback(
@@ -127,6 +136,20 @@ export function useWithdraw(
       setStatusMessage("Validating maturity withdrawal preflight conditions...");
 
       try {
+        if (vaultManager) {
+          const isPaused = await vaultManager.paused().catch(() => false);
+          if (isPaused) {
+            throw new Error("Action rejected: The banking vault is currently paused by Bank Admin.");
+          }
+          if (deposit.accruedInterest > 0n && mockUSDC) {
+            const vaultAddr = await vaultManager.getAddress();
+            const available = await mockUSDC.balanceOf(vaultAddr).catch(() => 0n);
+            if (BigInt(available) < deposit.accruedInterest) {
+              throw new Error("Action rejected: Bank vault has insufficient liquidity to pay contractual interest.");
+            }
+          }
+        }
+
         const currentOwner = await savingCore.ownerOf(deposit.depositId);
         if (currentOwner.toLowerCase() !== account.toLowerCase()) {
           throw new Error("Action rejected: Only the current owner of this deposit NFT certificate can perform maturity withdrawal.");
@@ -186,7 +209,7 @@ export function useWithdraw(
         return false;
       }
     },
-    [savingCore, account, onSuccess]
+    [savingCore, account, onSuccess, vaultManager, mockUSDC]
   );
 
   return {

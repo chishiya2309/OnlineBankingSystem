@@ -340,4 +340,32 @@ describe("Portfolio Discovery & Accounting Tests (PF-001 to PF-008)", () => {
     expect(result.activeDeposits).toHaveLength(1);
     expect(result.activeDeposits[0].depositId).toBe(1);
   });
+
+  it("PF-009: handles per-deposit RPC getDeposit errors gracefully without dropping other deposits", async () => {
+    const mockSavingCore = {
+      depositCount: vi.fn().mockResolvedValue(2n),
+      gracePeriodSeconds: vi.fn().mockResolvedValue(172800n),
+      filters: { Renewed: vi.fn().mockReturnValue({}) },
+      queryFilter: vi.fn().mockResolvedValue([]),
+      ownerOf: vi.fn().mockResolvedValue(aliceAddress),
+      getDeposit: vi.fn().mockImplementation((id: number) => {
+        if (id === 1) {
+          return Promise.resolve({
+            planId: 1n,
+            principal: 500000000n,
+            startAt: 1690000000n,
+            maturityAt: 1705000000n,
+            aprBpsAtOpen: 200,
+            penaltyBpsAtOpen: 350,
+            status: BigInt(DepositStatus.Active),
+          });
+        }
+        return Promise.reject(new Error("RPC rate limit on deposit #2"));
+      }),
+    } as any;
+
+    const result = await fetchUserPortfolio(mockSavingCore, aliceAddress, mockProvider);
+    expect(result.activeDeposits).toHaveLength(1);
+    expect(result.activeDeposits[0].depositId).toBe(1);
+  });
 });

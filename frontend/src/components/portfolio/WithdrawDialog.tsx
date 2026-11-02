@@ -1,21 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
 import { Icon } from "../layout/Icon";
 import type { DepositRecord } from "../../types";
 import type { UseWithdrawState } from "../../hooks/useWithdraw";
-import { shortenAddress } from "../../lib/format";
+import { formatUSDC, shortenAddress } from "../../lib/format";
 
 interface WithdrawDialogProps {
   deposit: DepositRecord | null;
   withdrawState: UseWithdrawState;
   onClose: () => void;
+  isPaused?: boolean;
+  vaultBalance?: bigint;
 }
 
 export const WithdrawDialog: React.FC<WithdrawDialogProps> = ({
   deposit,
   withdrawState,
   onClose,
+  isPaused = false,
+  vaultBalance,
 }) => {
   if (!deposit) return null;
+
+  const [hasConfirmedTotalLoss, setHasConfirmedTotalLoss] = useState(false);
 
   const {
     status,
@@ -28,6 +34,12 @@ export const WithdrawDialog: React.FC<WithdrawDialogProps> = ({
   } = withdrawState;
 
   const isEarly = deposit.canEarlyWithdraw;
+  const isTotalLoss = isEarly && (deposit.penaltyBpsAtOpen >= 10000 || deposit.earlyPayout === 0n);
+  const isInsufficientLiquidity =
+    !isEarly &&
+    deposit.accruedInterest > 0n &&
+    vaultBalance !== undefined &&
+    vaultBalance < deposit.accruedInterest;
   const isExecuting = status === "validating" || status === "awaiting-signature" || status === "pending";
 
   const handleConfirm = async () => {
@@ -39,6 +51,7 @@ export const WithdrawDialog: React.FC<WithdrawDialogProps> = ({
   };
 
   const handleDismiss = () => {
+    setHasConfirmedTotalLoss(false);
     resetFlow();
     onClose();
   };
@@ -155,14 +168,39 @@ export const WithdrawDialog: React.FC<WithdrawDialogProps> = ({
               )}
             </div>
 
-            {/* Warning banner for early withdrawal */}
-            {isEarly && (
+            {/* Emergency Pause Warning */}
+            {isPaused && (
+              <div className="alert-banner warning" style={{ marginBottom: "20px" }}>
+                <div>
+                  <strong>Vault Emergency Paused:</strong> Withdrawals cannot be processed while the banking vault is paused by Bank Admin.
+                </div>
+              </div>
+            )}
+
+            {/* Insufficient Vault Liquidity Warning for Maturity Settlement */}
+            {isInsufficientLiquidity && (
+              <div className="alert-banner warning" style={{ marginBottom: "20px" }}>
+                <div>
+                  <strong>Insufficient Bank Vault Liquidity:</strong> The bank vault currently holds {formatUSDC(vaultBalance, "auto")} USDC, which is insufficient to pay this certificate's contractual interest of {deposit.accruedInterestFormatted} USDC. Please contact bank administration to replenish the vault before withdrawing.
+                </div>
+              </div>
+            )}
+
+            {/* 100% Capital Loss Danger Warning */}
+            {isTotalLoss ? (
+              <div className="alert-banner error" style={{ marginBottom: "20px", borderLeft: "4px solid var(--color-paused-text)" }}>
+                <div>
+                  <strong>🚨 DANGER - 100% CAPITAL LOSS:</strong> This term deposit plan carries a 100% early withdrawal penalty. If you proceed, your entire principal balance of {deposit.principalFormatted} USDC will be forfeited and transferred to the bank fee receiver. You will receive 0.00 USDC payout.
+                </div>
+              </div>
+            ) : isEarly ? (
+              /* Standard early withdrawal warning */
               <div className="alert-banner warning" style={{ marginBottom: "20px" }}>
                 <div>
                   <strong>Permanent Action:</strong> Early withdrawal forfeits 100% of accrued interest and incurs a contractual penalty. This certificate will be permanently closed.
                 </div>
               </div>
-            )}
+            ) : null}
 
             {/* Financial figures */}
             <div className="detail-section glass-panel" style={{ padding: "16px", marginBottom: "20px" }}>
@@ -230,6 +268,37 @@ export const WithdrawDialog: React.FC<WithdrawDialogProps> = ({
               </div>
             )}
 
+            {/* 100% Capital Loss Explicit Confirmation Checkbox */}
+            {isTotalLoss && (
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "10px",
+                  margin: "16px 0 20px",
+                  padding: "12px",
+                  background: "var(--color-paused-bg)",
+                  border: "1px solid var(--color-paused-text)",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  color: "var(--color-paused-text)",
+                  fontSize: "13px",
+                  lineHeight: 1.5,
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={hasConfirmedTotalLoss}
+                  onChange={(e) => setHasConfirmedTotalLoss(e.target.checked)}
+                  disabled={isExecuting || isPaused}
+                  style={{ width: "18px", height: "18px", marginTop: "2px", accentColor: "var(--color-paused-text)" }}
+                />
+                <span>
+                  <strong>Required Acknowledgment:</strong> I understand and accept that this early withdrawal penalty is 100%. I will permanently forfeit my entire principal and receive <strong>0.00 USDC</strong> payout.
+                </span>
+              </label>
+            )}
+
             {/* Actions */}
             <div className="dialog-actions">
               <button
@@ -244,15 +313,32 @@ export const WithdrawDialog: React.FC<WithdrawDialogProps> = ({
 
               <button
                 type="button"
-                className={`btn text-nowrap ${isEarly ? "btn-secondary" : "btn-primary"}`}
+                className={`btn text-nowrap ${
+                  isTotalLoss
+                    ? "btn-danger"
+                    : isEarly
+                    ? "btn-secondary"
+                    : "btn-primary"
+                }`}
                 onClick={handleConfirm}
-                disabled={isExecuting}
+                disabled={
+                  isExecuting ||
+                  isPaused ||
+                  isInsufficientLiquidity ||
+                  (isTotalLoss && !hasConfirmedTotalLoss)
+                }
                 style={{
                   whiteSpace: "nowrap",
-                  ...(isEarly ? { borderColor: "var(--color-dusk)", color: "var(--color-dusk)" } : {}),
+                  ...(isEarly && !isTotalLoss ? { borderColor: "var(--color-dusk)", color: "var(--color-dusk)" } : {}),
                 }}
               >
-                {isExecuting ? "Executing…" : isEarly ? "Confirm Early Withdrawal" : "Confirm Settlement"}
+                {isExecuting
+                  ? "Executing…"
+                  : isTotalLoss
+                  ? "Forfeit Principal & Withdraw (0.00 USDC)"
+                  : isEarly
+                  ? "Confirm Early Withdrawal"
+                  : "Confirm Settlement"}
               </button>
             </div>
           </div>

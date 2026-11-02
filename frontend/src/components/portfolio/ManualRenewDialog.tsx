@@ -2,13 +2,15 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Icon } from "../layout/Icon";
 import type { DepositRecord, SavingPlan } from "../../types";
 import type { UseRenewalState } from "../../hooks/useRenewal";
-import { formatDurationSeconds, formatUSDC, shortenAddress } from "../../lib/format";
+import { formatDurationSeconds, formatTimestamp, formatUSDC, shortenAddress } from "../../lib/format";
 
 interface ManualRenewDialogProps {
   deposit: DepositRecord | null;
   savingPlans: SavingPlan[];
   renewalState: UseRenewalState;
   onClose: () => void;
+  isPaused?: boolean;
+  vaultBalance?: bigint;
 }
 
 export const ManualRenewDialog: React.FC<ManualRenewDialogProps> = ({
@@ -16,6 +18,8 @@ export const ManualRenewDialog: React.FC<ManualRenewDialogProps> = ({
   savingPlans,
   renewalState,
   onClose,
+  isPaused = false,
+  vaultBalance,
 }) => {
   if (!deposit) return null;
 
@@ -64,6 +68,11 @@ export const ManualRenewDialog: React.FC<ManualRenewDialogProps> = ({
     const meetsMax = plan.maxDeposit === 0n || compoundedPrincipal <= plan.maxDeposit;
     return meetsMin && meetsMax;
   };
+
+  const isInsufficientLiquidity =
+    deposit.accruedInterest > 0n &&
+    vaultBalance !== undefined &&
+    vaultBalance < deposit.accruedInterest;
 
   const isExecuting = status === "validating" || status === "awaiting-signature" || status === "pending";
 
@@ -174,6 +183,24 @@ export const ManualRenewDialog: React.FC<ManualRenewDialogProps> = ({
               )}
             </div>
 
+            {/* Emergency Pause Warning */}
+            {isPaused && (
+              <div className="alert-banner warning" style={{ marginBottom: "20px" }}>
+                <div>
+                  <strong>Vault Emergency Paused:</strong> Renewals cannot be processed while the banking vault is paused by Bank Admin.
+                </div>
+              </div>
+            )}
+
+            {/* Insufficient Vault Liquidity Warning */}
+            {isInsufficientLiquidity && (
+              <div className="alert-banner warning" style={{ marginBottom: "20px" }}>
+                <div>
+                  <strong>Insufficient Bank Vault Liquidity:</strong> The bank vault currently holds {formatUSDC(vaultBalance, "auto")} USDC, which is insufficient to compound this certificate's accrued interest ({deposit.accruedInterestFormatted} USDC). Please contact bank administration to replenish the vault before renewing.
+                </div>
+              </div>
+            )}
+
             {/* Compounding breakdown */}
             <div className="detail-section glass-panel" style={{ padding: "16px", marginBottom: "20px" }}>
               <div className="detail-row">
@@ -259,9 +286,15 @@ export const ManualRenewDialog: React.FC<ManualRenewDialogProps> = ({
               </div>
             </div>
 
-            {/* Explanatory note */}
-            <div style={{ fontSize: "12px", color: "var(--color-muted)", marginBottom: "20px", lineHeight: 1.6 }}>
-              <strong>Protocol Note:</strong> Manual renewal transitions the old deposit to status 2 (<code>ManualRenewed</code>). VaultManager transfers interest to SavingCore to fund the backing of your compounded principal, and a new transferable ERC721 NFT is minted to your wallet. No ERC20 approval is required.
+            {/* Protocol & On-Chain Lineage Difference Note */}
+            <div style={{ fontSize: "12px", color: "var(--color-muted)", marginBottom: "20px", lineHeight: 1.6, padding: "12px", background: "var(--color-paper-2)", borderRadius: "8px", border: "1px solid var(--color-rule)" }}>
+              <div style={{ marginBottom: "6px", fontWeight: 600, color: "var(--color-ink)" }}>
+                💡 Manual Renewal vs Auto Renewal On-Chain Guarantee:
+              </div>
+              <ul style={{ margin: "0 0 6px 18px", padding: 0 }}>
+                <li><strong>Manual Renew:</strong> Allows choosing any active plan at prevailing market APR. Requires the plan to be enabled and the compounded amount to be within deposit bounds.</li>
+                <li><strong>Auto Renew (Contract Guarantee):</strong> Bypasses plan enabled checks and deposit bounds. Once the grace period ends ({formatTimestamp(deposit.graceEnd)}), auto-renewal safely executes with your <strong>original locked snapshot APR ({deposit.aprBpsAtOpen / 100}%)</strong> and tenor preserved.</li>
+              </ul>
             </div>
 
             {/* Error banner */}
@@ -294,7 +327,13 @@ export const ManualRenewDialog: React.FC<ManualRenewDialogProps> = ({
                 type="button"
                 className="btn btn-primary text-nowrap"
                 onClick={handleConfirm}
-                disabled={isExecuting || !selectedPlan || !isEligible(selectedPlan)}
+                disabled={
+                  isExecuting ||
+                  isPaused ||
+                  isInsufficientLiquidity ||
+                  !selectedPlan ||
+                  !isEligible(selectedPlan)
+                }
                 style={{ whiteSpace: "nowrap" }}
               >
                 {isExecuting ? "Executing Renewal…" : "Confirm Renewal"}

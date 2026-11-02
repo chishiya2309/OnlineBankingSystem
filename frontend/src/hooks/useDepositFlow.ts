@@ -28,7 +28,8 @@ export function useDepositFlow(
   account: string | null,
   mockUSDC: ethers.Contract | null,
   savingCore: ethers.Contract | null,
-  savingCoreAddress: string | null
+  savingCoreAddress: string | null,
+  vaultManager?: ethers.Contract | null
 ): DepositFlowState {
   const [balance, setBalance] = useState<bigint>(0n);
   const [allowance, setAllowance] = useState<bigint>(0n);
@@ -132,6 +133,13 @@ export function useDepositFlow(
         setStatus("validating");
         setStatusMessage("Validating deposit requirements...");
 
+        if (vaultManager) {
+          const isPaused = await vaultManager.paused().catch(() => false);
+          if (isPaused) {
+            throw new Error("Action rejected: The banking vault is currently paused by Bank Admin.");
+          }
+        }
+
         if (!plan.enabled) {
           throw new Error("This plan is disabled and cannot accept new deposits.");
         }
@@ -231,7 +239,7 @@ export function useDepositFlow(
         return false;
       }
     },
-    [account, savingCore, mockUSDC, savingCoreAddress, balance, refreshBalances]
+    [account, savingCore, mockUSDC, savingCoreAddress, balance, refreshBalances, vaultManager]
   );
 
   const mintDemoTokens = useCallback(async (): Promise<boolean> => {
