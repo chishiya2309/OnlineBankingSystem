@@ -47,7 +47,7 @@ export const AccountOverview: React.FC<AccountOverviewProps> = ({
       {isStaleDeployment && (
         <div className="alert-banner error" role="alert">
           <div>
-            <strong>Deployment Not Found on Connected Node:</strong> No contract runtime bytecode was detected at the configured addresses. Please redeploy and re-export manifests (`npx hardhat run scripts/deploy.ts --network localhost`).
+            <strong>Deployment Not Found on Connected Node:</strong> No contract runtime bytecode was detected at the configured addresses. Please verify contract addresses or check your network connection.
           </div>
         </div>
       )}

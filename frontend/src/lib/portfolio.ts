@@ -12,6 +12,7 @@ import {
 } from "./financials";
 import { formatUSDC } from "./format";
 import { getDeployedBlock } from "./contracts";
+import { getDefaultChainId } from "../config/networks";
 
 export interface PortfolioFetchResult {
   activeDeposits: DepositRecord[];
@@ -100,7 +101,7 @@ export async function fetchUserPortfolio(
   const renewedToMap = new Map<number, number>();
   const renewedFromMap = new Map<number, number>();
   try {
-    let chainId = 31337;
+    let chainId = getDefaultChainId();
     let fromBlock = 0;
     let toBlock: number | "latest" = "latest";
 

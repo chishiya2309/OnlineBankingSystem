@@ -42,7 +42,7 @@ export function parseTransactionError(error: any): string {
 
   // Network mismatch or RPC unavailable
   if (lowerMsg.includes("network error") || lowerMsg.includes("failed to fetch") || lowerMsg.includes("could not detect network")) {
-    return "Unable to connect to blockchain RPC node. Please verify your local node is running (http://127.0.0.1:8545).";
+    return "Unable to connect to blockchain RPC node. Please verify your internet connection or network provider.";
   }
 
   // Insufficient ETH for gas

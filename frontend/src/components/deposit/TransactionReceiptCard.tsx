@@ -2,6 +2,7 @@ import React from "react";
 import { Icon } from "../layout/Icon";
 import type { ConfirmedDepositResult } from "../../types";
 import { shortenAddress } from "../../lib/format";
+import { getNetworkConfig } from "../../config/networks";
 
 interface TransactionReceiptCardProps {
   confirmedDeposit: ConfirmedDepositResult;
@@ -16,10 +17,10 @@ export const TransactionReceiptCard: React.FC<TransactionReceiptCardProps> = ({
   onReset,
   onViewInPortfolio,
 }) => {
-  const explorerTx =
-    chainId === 11155111
-      ? `https://sepolia.etherscan.io/tx/${confirmedDeposit.txHash}`
-      : null;
+  const networkConfig = chainId ? getNetworkConfig(chainId) : undefined;
+  const explorerTx = networkConfig?.blockExplorerUrl
+    ? `${networkConfig.blockExplorerUrl}/tx/${confirmedDeposit.txHash}`
+    : null;
 
   return (
     <div className="tx-state-card success">

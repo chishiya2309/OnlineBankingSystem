@@ -18,6 +18,8 @@ import {
   getNetworkConfig,
   getAddChainParams,
   SUPPORTED_NETWORKS,
+  getDefaultChainId,
+  setPreferredChainId,
 } from "../config/networks";
 
 describe("Contracts & Network Registry (FE-001, FE-002, FE-016)", () => {
@@ -60,6 +62,26 @@ describe("Contracts & Network Registry (FE-001, FE-002, FE-016)", () => {
     expect(params?.chainId).toBe("0x7a69"); // 31337 in hex
     expect(params?.chainName).toBe(SUPPORTED_NETWORKS[31337].displayName);
     expect(params?.rpcUrls).toContain("http://127.0.0.1:8545");
+  });
+
+  it("FE-002b: defaults to 31337 on localhost and in testing environment", () => {
+    localStorage.removeItem("preferred_chain_id");
+    expect(getDefaultChainId()).toBe(31337);
+  });
+
+  it("FE-002c: prioritizes user preferred chain ID from localStorage", () => {
+    setPreferredChainId(11155111);
+    expect(getDefaultChainId()).toBe(11155111);
+    localStorage.removeItem("preferred_chain_id");
+  });
+
+  it("FE-002d: auto-detects remote web domain and defaults to Sepolia 11155111", () => {
+    localStorage.removeItem("preferred_chain_id");
+    const originalLocation = window.location;
+    delete (window as any).location;
+    (window as any).location = { hostname: "chishiya2309.github.io" };
+    expect(getDefaultChainId()).toBe(11155111);
+    (window as any).location = originalLocation;
   });
 
   it("FE-016: detects stale deployment when getCode returns 0x", async () => {

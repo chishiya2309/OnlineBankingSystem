@@ -20,6 +20,43 @@ export const SUPPORTED_NETWORKS: Record<number, NetworkConfig> = {
   },
 };
 
+/**
+ * Resolves the default target network chain ID.
+ * - Checks user preference in localStorage ('preferred_chain_id')
+ * - When running on a remote web domain (e.g. GitHub Pages, Vercel, Netlify), defaults to Ethereum Sepolia (11155111).
+ * - When running locally (localhost, 127.0.0.1) or in testing environments, defaults to Hardhat Localhost (31337).
+ */
+export function getDefaultChainId(): number {
+  if (typeof window !== "undefined") {
+    try {
+      const preferred = window.localStorage.getItem("preferred_chain_id");
+      if (preferred && (preferred === "11155111" || preferred === "31337")) {
+        return Number(preferred);
+      }
+      const hostname = window.location.hostname;
+      if (hostname && hostname !== "localhost" && hostname !== "127.0.0.1") {
+        return 11155111;
+      }
+    } catch {
+      // In private browsing or sandboxed environments
+    }
+  }
+  return 31337;
+}
+
+/**
+ * Stores user-selected network preference in localStorage.
+ */
+export function setPreferredChainId(chainId: number): void {
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem("preferred_chain_id", chainId.toString());
+    } catch {
+      // Ignore storage quota errors
+    }
+  }
+}
+
 export const DEFAULT_CHAIN_ID = 31337;
 
 export function getNetworkConfig(chainId: number): NetworkConfig | undefined {

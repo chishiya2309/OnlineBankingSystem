@@ -1,6 +1,7 @@
 import React from "react";
 import type { ContractAddresses } from "../../types";
 import { shortenAddress } from "../../lib/format";
+import { getNetworkConfig } from "../../config/networks";
 
 interface FooterProps {
   addresses: ContractAddresses | null;
@@ -8,7 +9,10 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ addresses, chainId }) => {
-  const explorerBase = chainId === 11155111 ? "https://sepolia.etherscan.io/address/" : null;
+  const networkConfig = chainId ? getNetworkConfig(chainId) : undefined;
+  const explorerBase = networkConfig?.blockExplorerUrl
+    ? `${networkConfig.blockExplorerUrl}/address/`
+    : null;
 
   return (
     <footer className="app-footer">

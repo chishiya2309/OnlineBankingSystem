@@ -177,6 +177,7 @@ export const App: React.FC = () => {
                     isCorrectNetwork={wallet.isCorrectNetwork}
                     onApprove={depositFlow.approve}
                     onOpenDeposit={handleOpenDeposit}
+                    onSwitchNetwork={(targetId) => wallet.switchNetwork(targetId)}
                   />
                 </div>
 
@@ -223,7 +224,7 @@ export const App: React.FC = () => {
                   isStaleDeployment={contracts.isStaleDeployment}
                   error={portfolio.error}
                   onConnect={wallet.connect}
-                  onSwitchNetwork={() => wallet.switchNetwork(31337)}
+                  onSwitchNetwork={(targetId) => wallet.switchNetwork(targetId ?? 11155111)}
                   onNavigateToPlans={() => navigate("plans")}
                   onRetry={portfolio.refetch}
                 />

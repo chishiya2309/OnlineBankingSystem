@@ -6,7 +6,7 @@ interface PortfolioEmptyStateProps {
   isStaleDeployment: boolean;
   error: string | null;
   onConnect: () => void;
-  onSwitchNetwork: () => void;
+  onSwitchNetwork: (chainId?: number) => void;
   onNavigateToPlans: () => void;
   onRetry: () => void;
 }
@@ -49,16 +49,26 @@ export const PortfolioEmptyState: React.FC<PortfolioEmptyStateProps> = ({
           Unsupported Network
         </h3>
         <p style={{ color: "var(--color-muted)", fontSize: "14px", maxWidth: "480px", margin: "0 auto 20px" }}>
-          Your wallet is connected to an unsupported network. Please switch to Hardhat Localhost (Chain ID 31337) to access term deposits.
+          Your wallet is connected to an unsupported network. Please switch to Ethereum Sepolia or Hardhat Localhost to access your term deposits.
         </p>
-        <button
-          type="button"
-          className="btn btn-secondary text-nowrap"
-          onClick={onSwitchNetwork}
-          style={{ whiteSpace: "nowrap" }}
-        >
-          Switch to Localhost
-        </button>
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            className="btn btn-primary text-nowrap"
+            onClick={() => onSwitchNetwork(11155111)}
+            style={{ whiteSpace: "nowrap" }}
+          >
+            Switch to Ethereum Sepolia
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary text-nowrap"
+            onClick={() => onSwitchNetwork(31337)}
+            style={{ whiteSpace: "nowrap" }}
+          >
+            Switch to Localhost
+          </button>
+        </div>
       </div>
     );
   }
@@ -67,10 +77,10 @@ export const PortfolioEmptyState: React.FC<PortfolioEmptyStateProps> = ({
     return (
       <div className="glass-panel" style={{ padding: "48px 24px", textAlign: "center", margin: "24px 0" }}>
         <h3 style={{ fontSize: "18px", fontWeight: 600, color: "var(--color-dusk)", marginBottom: "8px" }}>
-          Stale Contract Deployment
+          Contract Deployment Not Detected
         </h3>
         <p style={{ color: "var(--color-muted)", fontSize: "14px", maxWidth: "520px", margin: "0 auto 20px" }}>
-          No runtime bytecode found at the configured contract addresses on the connected node. The local Hardhat node may have been restarted.
+          No runtime bytecode found at the configured contract addresses on the connected node. If testing locally, the local Hardhat node may have been restarted.
         </p>
         <div style={{ fontFamily: "monospace", fontSize: "13px", background: "var(--color-paper-2)", padding: "12px", borderRadius: "8px", maxWidth: "480px", margin: "0 auto 20px" }}>
           npm run deploy:localhost<br />

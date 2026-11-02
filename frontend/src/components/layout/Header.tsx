@@ -1,6 +1,6 @@
 import React from "react";
 import type { WalletState } from "../../hooks/useWallet";
-import { getNetworkConfig } from "../../config/networks";
+import { getNetworkConfig, setPreferredChainId } from "../../config/networks";
 import { shortenAddress } from "../../lib/format";
 import { Icon } from "./Icon";
 
@@ -47,7 +47,10 @@ export const Header: React.FC<HeaderProps> = ({ wallet, isBankAdmin = false, tit
                   <button
                     type="button"
                     className="btn btn-ghost btn-sm text-nowrap"
-                    onClick={() => switchNetwork(targetSwitchChainId)}
+                    onClick={() => {
+                      setPreferredChainId(targetSwitchChainId);
+                      switchNetwork(targetSwitchChainId);
+                    }}
                     title={`Switch network to ${targetSwitchName}`}
                     style={{ whiteSpace: "nowrap" }}
                   >
@@ -55,15 +58,35 @@ export const Header: React.FC<HeaderProps> = ({ wallet, isBankAdmin = false, tit
                   </button>
                 </div>
               ) : (
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm text-nowrap"
-                  onClick={() => switchNetwork(31337)}
-                  style={{ whiteSpace: "nowrap" }}
-                  title="Switch to Hardhat Localhost"
-                >
-                  <span className="network-badge wrong text-nowrap" style={{ whiteSpace: "nowrap" }}>Wrong Network: Switch to Localhost</span>
-                </button>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                  <span className="network-badge wrong text-nowrap" style={{ whiteSpace: "nowrap" }}>
+                    Wrong Network
+                  </span>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm text-nowrap"
+                    onClick={() => {
+                      setPreferredChainId(11155111);
+                      switchNetwork(11155111);
+                    }}
+                    style={{ whiteSpace: "nowrap" }}
+                    title="Switch to Ethereum Sepolia"
+                  >
+                    To Sepolia
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm text-nowrap"
+                    onClick={() => {
+                      setPreferredChainId(31337);
+                      switchNetwork(31337);
+                    }}
+                    style={{ whiteSpace: "nowrap" }}
+                    title="Switch to Hardhat Localhost"
+                  >
+                    To Localhost
+                  </button>
+                </div>
               )}
 
               {isBankAdmin && (

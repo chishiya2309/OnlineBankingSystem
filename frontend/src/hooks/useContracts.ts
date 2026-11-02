@@ -4,7 +4,7 @@ import {
   getContractInstances,
   verifyContractBytecode,
 } from "../lib/contracts";
-import { SUPPORTED_NETWORKS, DEFAULT_CHAIN_ID } from "../config/networks";
+import { SUPPORTED_NETWORKS, getDefaultChainId } from "../config/networks";
 import type { ContractAddresses } from "../types";
 
 export interface ContractsState {
@@ -22,7 +22,7 @@ export function useContracts(
   signer: ethers.Signer | null,
   browserProvider: ethers.BrowserProvider | null
 ): ContractsState {
-  const activeChainId = chainId && chainId in SUPPORTED_NETWORKS ? chainId : DEFAULT_CHAIN_ID;
+  const activeChainId = chainId && chainId in SUPPORTED_NETWORKS ? chainId : getDefaultChainId();
   const [isStaleDeployment, setIsStaleDeployment] = useState<boolean>(false);
   const [isValidating, setIsValidating] = useState<boolean>(false);
 
@@ -31,7 +31,8 @@ export function useContracts(
     if (browserProvider && chainId && chainId in SUPPORTED_NETWORKS) {
       return browserProvider;
     }
-    const rpcUrl = SUPPORTED_NETWORKS[activeChainId]?.rpcUrl || "http://127.0.0.1:8545";
+    const config = SUPPORTED_NETWORKS[activeChainId];
+    const rpcUrl = config?.rpcUrl || (activeChainId === 11155111 ? "https://ethereum-sepolia-rpc.publicnode.com" : "http://127.0.0.1:8545");
     return new ethers.JsonRpcProvider(rpcUrl);
   }, [browserProvider, chainId, activeChainId]);
 

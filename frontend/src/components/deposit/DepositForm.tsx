@@ -13,6 +13,7 @@ interface DepositFormProps {
   isCorrectNetwork: boolean;
   onApprove: (plan: SavingPlan, amountStr: string) => Promise<boolean>;
   onOpenDeposit: (plan: SavingPlan, amountStr: string) => Promise<boolean>;
+  onSwitchNetwork?: (chainId: number) => void;
 }
 
 export const DepositForm: React.FC<DepositFormProps> = ({
@@ -25,6 +26,7 @@ export const DepositForm: React.FC<DepositFormProps> = ({
   isCorrectNetwork,
   onApprove,
   onOpenDeposit,
+  onSwitchNetwork,
 }) => {
   const [amountStr, setAmountStr] = useState<string>("500.00");
   const [hasEditedAmount, setHasEditedAmount] = useState(false);
@@ -205,8 +207,28 @@ export const DepositForm: React.FC<DepositFormProps> = ({
               Please connect MetaMask to proceed with opening a deposit.
             </div>
           ) : !isCorrectNetwork ? (
-            <div style={{ color: "var(--color-dusk)", fontSize: "14px", textAlign: "center" }}>
-              Please switch to Hardhat Localhost network (31337) to transact.
+            <div style={{ textAlign: "center", padding: "14px", background: "var(--color-paper-2)", borderRadius: "var(--radius-inner)", border: "var(--rule-hair) solid var(--color-rule)" }}>
+              <div style={{ color: "var(--color-dusk)", fontSize: "14px", fontWeight: 500, marginBottom: "10px" }}>
+                Unsupported network. Please switch to a supported network:
+              </div>
+              <div style={{ display: "flex", gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm text-nowrap"
+                  onClick={() => onSwitchNetwork?.(11155111)}
+                  style={{ whiteSpace: "nowrap" }}
+                >
+                  Switch to Ethereum Sepolia
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm text-nowrap"
+                  onClick={() => onSwitchNetwork?.(31337)}
+                  style={{ whiteSpace: "nowrap" }}
+                >
+                  Switch to Localhost
+                </button>
+              </div>
             </div>
           ) : (
             <div>
