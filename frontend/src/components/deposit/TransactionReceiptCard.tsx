@@ -1,4 +1,5 @@
 import React from "react";
+import { Icon } from "../layout/Icon";
 import type { ConfirmedDepositResult } from "../../types";
 import { shortenAddress } from "../../lib/format";
 
@@ -37,7 +38,7 @@ export const TransactionReceiptCard: React.FC<TransactionReceiptCardProps> = ({
             fontSize: "18px",
           }}
         >
-          ✓
+          <Icon name="check" size={22} />
         </span>
         <div>
           <h4 className="tx-state-title">Deposit Confirmed on Blockchain</h4>
@@ -91,7 +92,7 @@ export const TransactionReceiptCard: React.FC<TransactionReceiptCardProps> = ({
               rel="noreferrer"
               className="tx-hash-link tabular-num"
             >
-              {shortenAddress(confirmedDeposit.txHash, 8)} ↗
+              {shortenAddress(confirmedDeposit.txHash, 8)}
             </a>
           ) : (
             <span className="tabular-num" style={{ color: "var(--color-accent)" }}>

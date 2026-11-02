@@ -1,4 +1,5 @@
 import React from "react";
+import { Icon } from "../layout/Icon";
 import type { DepositRecord } from "../../types";
 import type { UseWithdrawState } from "../../hooks/useWithdraw";
 import { shortenAddress } from "../../lib/format";
@@ -68,7 +69,7 @@ export const WithdrawDialog: React.FC<WithdrawDialogProps> = ({
                   fontSize: "20px",
                 }}
               >
-                ✓
+                <Icon name="check" size={22} />
               </div>
               <h3 style={{ fontSize: "20px", fontWeight: 600, color: "var(--color-ink)", margin: 0 }}>
                 {confirmedWithdraw.isEarly ? "Early Withdrawal Settled" : "Maturity Settlement Successful"}
@@ -230,7 +231,7 @@ export const WithdrawDialog: React.FC<WithdrawDialogProps> = ({
             )}
 
             {/* Actions */}
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px" }}>
+            <div className="dialog-actions">
               <button
                 type="button"
                 className="btn btn-secondary text-nowrap"

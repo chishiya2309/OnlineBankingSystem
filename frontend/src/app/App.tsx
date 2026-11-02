@@ -9,6 +9,7 @@ import { useRenewal } from "../hooks/useRenewal";
 import type { SavingPlan, DepositRecord } from "../types";
 
 import { Header } from "../components/layout/Header";
+import { Sidebar, type AppView } from "../components/layout/Sidebar";
 import { Footer } from "../components/layout/Footer";
 import { AccountOverview } from "../components/overview/AccountOverview";
 import { PlanList } from "../components/plans/PlanList";
@@ -69,7 +70,13 @@ export const App: React.FC = () => {
   const currentNetwork = wallet.chainId ? getNetworkConfig(wallet.chainId) : undefined;
 
   // Navigation tab: 'plans' | 'portfolio' | 'admin'
-  const [activeTab, setActiveTab] = useState<"plans" | "portfolio" | "admin">("plans");
+  const [activeTab, setActiveTab] = useState<AppView>("plans");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = (tab: AppView) => {
+    setActiveTab(tab);
+    setIsMenuOpen(false);
+  };
+  const pageTitle = { plans: "Saving Plans & Open", portfolio: "My Portfolio", admin: "Admin Portal" }[activeTab];
 
   // Plan selection
   const [selectedPlan, setSelectedPlan] = useState<SavingPlan | null>(null);
@@ -107,13 +114,19 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="app-root">
-      <Header wallet={wallet} isBankAdmin={admin.summary.isBankAdmin} />
+    <div className="app-root" onKeyDown={(event) => {
+      if (event.key === "Escape" && isMenuOpen) {
+        setIsMenuOpen(false);
+        document.getElementById("navigation-toggle")?.focus();
+      }
+    }}>
+      <Header wallet={wallet} isBankAdmin={admin.summary.isBankAdmin} title={pageTitle} isMenuOpen={isMenuOpen} onToggleMenu={() => setIsMenuOpen(!isMenuOpen)} />
+      <Sidebar activeTab={activeTab} onTabChange={navigate} activeDepositCount={wallet.isConnected ? portfolio.summary.activeCount : 0} isBankAdmin={admin.summary.isBankAdmin} isMenuOpen={isMenuOpen} />
 
-      <main className="main-content">
-        <div className="app-container">
+      <main id="workspace-panel" className="main-content" role="tabpanel" aria-labelledby={`tab-${activeTab}`}>
+        <div className={`app-container${activeTab === "plans" ? " plans-layout" : ""}`}>
           {/* Hero section */}
-          <div className="hero-section">
+          <div className="page-intro">
             <h2 className="hero-headline">
               Institutional-grade digital term deposits on Ethereum.
             </h2>
@@ -134,62 +147,6 @@ export const App: React.FC = () => {
             onMintDemoTokens={depositFlow.mintDemoTokens}
           />
 
-          {/* Top Application Navigation */}
-          <div className="app-nav-bar" style={{ margin: "28px 0 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div className="segmented-tabs" role="tablist">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeTab === "plans"}
-                className={`tab-btn text-nowrap ${activeTab === "plans" ? "active" : ""}`}
-                onClick={() => setActiveTab("plans")}
-                style={{ whiteSpace: "nowrap" }}
-              >
-                <span style={{ whiteSpace: "nowrap" }}>Saving Plans &amp; Open</span>
-              </button>
-
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeTab === "portfolio"}
-                className={`tab-btn text-nowrap ${activeTab === "portfolio" ? "active" : ""}`}
-                onClick={() => setActiveTab("portfolio")}
-                style={{ whiteSpace: "nowrap" }}
-              >
-                <span style={{ whiteSpace: "nowrap" }}>My Portfolio</span>
-                {wallet.isConnected && portfolio.summary.activeCount > 0 && (
-                  <span className="badge-count tabular-num" style={{ marginLeft: "8px", whiteSpace: "nowrap" }}>
-                    {portfolio.summary.activeCount}
-                  </span>
-                )}
-              </button>
-
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeTab === "admin"}
-                className={`tab-btn text-nowrap ${activeTab === "admin" ? "active" : ""}`}
-                onClick={() => setActiveTab("admin")}
-                style={{ whiteSpace: "nowrap" }}
-              >
-                <span style={{ whiteSpace: "nowrap" }}>Admin Portal</span>
-                {admin.summary.isBankAdmin && (
-                  <span
-                    className="badge-count tabular-num"
-                    style={{
-                      marginLeft: "8px",
-                      background: "var(--color-accent)",
-                      color: "var(--color-accent-ink)",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    Admin
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
-
           {/* Global Alert Notification */}
           {(wallet.error || depositFlow.error || portfolio.error) && (
             <div className="alert-banner error" role="alert" style={{ marginBottom: "28px" }}>
@@ -209,8 +166,7 @@ export const App: React.FC = () => {
                 onRefresh={savingPlans.refetch}
               />
 
-              <div className="workspace-grid">
-                <div>
+                <div className="deposit-workspace">
                   <DepositForm
                     selectedPlan={selectedPlan}
                     balance={depositFlow.balance}
@@ -224,16 +180,16 @@ export const App: React.FC = () => {
                   />
                 </div>
 
-                <div>
+                <div className="deposit-context">
                   {depositFlow.confirmedDeposit ? (
                     <TransactionReceiptCard
                       confirmedDeposit={depositFlow.confirmedDeposit}
                       chainId={wallet.chainId}
                       onReset={depositFlow.resetFlow}
-                      onViewInPortfolio={() => setActiveTab("portfolio")}
+                      onViewInPortfolio={() => navigate("portfolio")}
                     />
                   ) : (
-                    <div className="glass-panel" style={{ padding: "28px" }}>
+                    <div className="how-it-works">
                       <h4 style={{ fontSize: "17px", fontWeight: "600", marginBottom: "14px" }}>
                         How It Works
                       </h4>
@@ -254,7 +210,6 @@ export const App: React.FC = () => {
                     </div>
                   )}
                 </div>
-              </div>
             </div>
           )}
 
@@ -269,7 +224,7 @@ export const App: React.FC = () => {
                   error={portfolio.error}
                   onConnect={wallet.connect}
                   onSwitchNetwork={() => wallet.switchNetwork(31337)}
-                  onNavigateToPlans={() => setActiveTab("plans")}
+                  onNavigateToPlans={() => navigate("plans")}
                   onRetry={portfolio.refetch}
                 />
               ) : (
@@ -289,7 +244,7 @@ export const App: React.FC = () => {
                       onWithdraw={(d) => setWithdrawDeposit(d)}
                       onManualRenew={(d) => setManualRenewDeposit(d)}
                       onAutoRenew={(d) => setAutoRenewDeposit(d)}
-                      onNavigateToPlans={() => setActiveTab("plans")}
+                      onNavigateToPlans={() => navigate("plans")}
                       onSelectDeposit={handleSelectDepositById}
                     />
                   </div>
@@ -313,6 +268,7 @@ export const App: React.FC = () => {
           )}
         </div>
       </main>
+      <Footer addresses={contracts.addresses} chainId={wallet.chainId} />
 
       {/* Modal Dialogs */}
       {detailDeposit && (
@@ -353,7 +309,6 @@ export const App: React.FC = () => {
         />
       )}
 
-      <Footer addresses={contracts.addresses} chainId={wallet.chainId} />
     </div>
   );
 };

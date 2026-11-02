@@ -1,4 +1,5 @@
 import React from "react";
+import { Icon } from "../layout/Icon";
 import { DepositStatus, type DepositRecord } from "../../types";
 import { formatDurationSeconds, formatBps, formatTimestamp, shortenAddress } from "../../lib/format";
 
@@ -24,7 +25,7 @@ export const DepositCard: React.FC<DepositCardProps> = ({
       case DepositStatus.Active:
         return (
           <span className="deposit-status-badge badge-active" title="Active on-chain deposit">
-            <span className="status-dot"></span> Active
+            Active
           </span>
         );
       case DepositStatus.Withdrawn:
@@ -89,12 +90,12 @@ export const DepositCard: React.FC<DepositCardProps> = ({
           >
             <span>
               {deposit.renewalType === "auto"
-                ? `🔄 From #${deposit.renewedFromDepositId} (Auto Renew)`
+                ? `From #${deposit.renewedFromDepositId} (Auto Renew)`
                 : deposit.renewalType === "manual"
-                ? `🔄 From #${deposit.renewedFromDepositId} (Manual Renew)`
-                : `🔄 From #${deposit.renewedFromDepositId}`}
+                ? `From #${deposit.renewedFromDepositId} (Manual Renew)`
+                : `From #${deposit.renewedFromDepositId}`}
             </span>
-            <span className="lineage-arrow-icon">↗</span>
+            <Icon name="arrow" size={14} className="lineage-arrow-icon" />
           </button>
         )}
         {deposit.renewedToDepositId && (
@@ -109,8 +110,8 @@ export const DepositCard: React.FC<DepositCardProps> = ({
             }}
             title={`Rolled over into Certificate #${deposit.renewedToDepositId}. Click to view successor Certificate #${deposit.renewedToDepositId}`}
           >
-            <span>↳ Succeeded by #{deposit.renewedToDepositId}</span>
-            <span className="lineage-arrow-icon">↗</span>
+            <span>Succeeded by #{deposit.renewedToDepositId}</span>
+            <Icon name="arrow" size={14} className="lineage-arrow-icon" />
           </button>
         )}
       </div>
@@ -124,13 +125,19 @@ export const DepositCard: React.FC<DepositCardProps> = ({
             onClick={() => onSelectDeposit && onSelectDeposit(deposit.predecessorSummary!.depositId)}
             role="button"
             tabIndex={0}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                event.currentTarget.click();
+              }
+            }}
             title="Click to view predecessor certificate"
           >
-            <span className="lineage-context-icon">↳</span>
+            <Icon name="refresh" size={16} className="lineage-context-icon" />
             <span className="lineage-context-text">
               Rolled over from <strong>Certificate #{deposit.predecessorSummary.depositId}</strong> (Plan #{deposit.predecessorSummary.planId} • {deposit.predecessorSummary.principalFormatted} USDC principal + {deposit.predecessorSummary.accruedInterestFormatted} USDC yield)
             </span>
-            <span className="lineage-context-action">View # {deposit.predecessorSummary.depositId} ↗</span>
+            <span className="lineage-context-action">View # {deposit.predecessorSummary.depositId}</span>
           </div>
         )}
         {deposit.successorSummary && (
@@ -139,13 +146,19 @@ export const DepositCard: React.FC<DepositCardProps> = ({
             onClick={() => onSelectDeposit && onSelectDeposit(deposit.successorSummary!.depositId)}
             role="button"
             tabIndex={0}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                event.currentTarget.click();
+              }
+            }}
             title="Click to view successor certificate"
           >
-            <span className="lineage-context-icon">↳</span>
+            <Icon name="refresh" size={16} className="lineage-context-icon" />
             <span className="lineage-context-text">
               Re-invested as <strong>Certificate #{deposit.successorSummary.depositId}</strong> (Plan #{deposit.successorSummary.planId} • {deposit.successorSummary.principalFormatted} USDC principal)
             </span>
-            <span className="lineage-context-action">View # {deposit.successorSummary.depositId} ↗</span>
+            <span className="lineage-context-action">View # {deposit.successorSummary.depositId}</span>
           </div>
         )}
         <div className="deposit-principal-row">

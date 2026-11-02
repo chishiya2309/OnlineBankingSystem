@@ -224,7 +224,8 @@ export const AdminPlansManager: React.FC<AdminPlansManagerProps> = ({
       )}
 
       {/* Saving Plans Table */}
-      <div className="admin-table-container" style={{ marginTop: "20px" }}>
+      <p id="plan-table-scroll-hint" className="table-scroll-hint">Scroll horizontally to view all plan details and actions.</p>
+      <div className="admin-table-container" role="region" aria-label="Saving plan details and actions" aria-describedby="plan-table-scroll-hint" tabIndex={0} style={{ marginTop: "20px" }}>
         <table className="admin-table">
           <thead>
             <tr>

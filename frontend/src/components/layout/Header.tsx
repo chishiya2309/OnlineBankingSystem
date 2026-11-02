@@ -2,13 +2,17 @@ import React from "react";
 import type { WalletState } from "../../hooks/useWallet";
 import { getNetworkConfig } from "../../config/networks";
 import { shortenAddress } from "../../lib/format";
+import { Icon } from "./Icon";
 
 interface HeaderProps {
   wallet: WalletState;
   isBankAdmin?: boolean;
+  title: string;
+  isMenuOpen: boolean;
+  onToggleMenu: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ wallet, isBankAdmin = false }) => {
+export const Header: React.FC<HeaderProps> = ({ wallet, isBankAdmin = false, title, isMenuOpen, onToggleMenu }) => {
   const { account, chainId, isConnecting, isConnected, isCorrectNetwork, connect, disconnect, switchNetwork } = wallet;
   const currentNetwork = chainId ? getNetworkConfig(chainId) : undefined;
 
@@ -18,16 +22,17 @@ export const Header: React.FC<HeaderProps> = ({ wallet, isBankAdmin = false }) =
   return (
     <header className="app-header">
       <div className="app-container header-inner">
-        <div className="wordmark">
-          <img
-            src="/favicon.svg"
-            alt="LEDGER Logo"
-            width="28"
-            height="28"
-            style={{ borderRadius: "7px", flexShrink: 0 }}
-          />
-          <h1 className="wordmark-title">LEDGER</h1>
-          <span className="wordmark-sub">Digital Savings and Term Deposit</span>
+        <div className="header-heading">
+          <button id="navigation-toggle" type="button" className="btn btn-ghost menu-toggle" aria-label={isMenuOpen ? "Close navigation" : "Open navigation"} aria-expanded={isMenuOpen} aria-controls="app-navigation" onClick={onToggleMenu}>
+            <Icon name={isMenuOpen ? "close" : "menu"} />
+          </button>
+          <div className="header-title-group">
+            <div className="mobile-brand">
+              <img src="/favicon.svg" alt="LEDGER Logo" width="24" height="24" />
+              <span>LEDGER</span>
+            </div>
+            <h1 className="page-title">{title}</h1>
+          </div>
         </div>
 
         <div className="header-actions">
@@ -36,7 +41,6 @@ export const Header: React.FC<HeaderProps> = ({ wallet, isBankAdmin = false }) =
               {isCorrectNetwork && currentNetwork ? (
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                   <div className={`network-badge ${currentNetwork.name === "localhost" ? "local" : "sepolia"}`}>
-                    <span className="status-dot"></span>
                     <span>{currentNetwork.displayName}</span>
                   </div>
 

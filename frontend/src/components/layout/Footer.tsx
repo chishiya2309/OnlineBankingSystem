@@ -17,9 +17,6 @@ export const Footer: React.FC<FooterProps> = ({ addresses, chainId }) => {
           <div>
             <strong>LEDGER</strong>: Decentralized Term Deposit and Savings Infrastructure
           </div>
-          <div>
-            Hallmark v2.0.0 Dusk Theme, Wix Madefor Typography, High Contrast
-          </div>
         </div>
 
         {addresses && (

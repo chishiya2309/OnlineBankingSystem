@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { Icon } from "../layout/Icon";
 import type { DepositRecord, SavingPlan } from "../../types";
 import type { UseRenewalState } from "../../hooks/useRenewal";
 import { formatDurationSeconds, formatUSDC, shortenAddress } from "../../lib/format";
@@ -102,7 +103,7 @@ export const ManualRenewDialog: React.FC<ManualRenewDialogProps> = ({
                   fontSize: "20px",
                 }}
               >
-                ✓
+                <Icon name="check" size={22} />
               </div>
               <h3 style={{ fontSize: "20px", fontWeight: 600, color: "var(--color-ink)", margin: 0 }}>
                 Manual Renewal Completed!
@@ -209,7 +210,7 @@ export const ManualRenewDialog: React.FC<ManualRenewDialogProps> = ({
                   return (
                     <div
                       key={plan.planId}
-                      className={`glass-panel ${isSelected ? "selected-plan-border" : ""}`}
+                      className={`glass-panel renewal-plan-option ${isSelected ? "selected-plan-border" : ""}`}
                       style={{
                         padding: "14px 16px",
                         cursor: eligible ? "pointer" : "not-allowed",
@@ -243,6 +244,7 @@ export const ManualRenewDialog: React.FC<ManualRenewDialogProps> = ({
                           <input
                             type="radio"
                             name="targetPlan"
+                            aria-label={`Select Plan #${plan.planId}`}
                             checked={isSelected}
                             onChange={() => setSelectedPlanId(plan.planId)}
                             style={{ accentColor: "var(--color-accent)" }}
@@ -277,7 +279,7 @@ export const ManualRenewDialog: React.FC<ManualRenewDialogProps> = ({
             )}
 
             {/* Actions */}
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px" }}>
+            <div className="dialog-actions">
               <button
                 type="button"
                 className="btn btn-secondary text-nowrap"

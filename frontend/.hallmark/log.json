@@ -1,0 +1,44 @@
+[
+ {
+  "date": "2026-11-02",
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "app",
+  "theme": "reference-led",
+  "shape": "app screen",
+  "nav": "sidebar; inline menu below 960px",
+  "footer": "contract registry",
+  "imagery": "existing LEDGER brand asset; real local-chain UI screenshots",
+  "photos": [],
+  "entry": "src/app/App.tsx",
+  "signature": "Live MockUSDC balance and plan ledger next to the working deposit form",
+  "sections": [
+   "account overview",
+   "saving plans and deposit",
+   "portfolio and certificate lineage",
+   "admin controls"
+  ],
+  "waived": [],
+  "prompt": "Restyle the existing LEDGER frontend from the supplied white/cobalt reference while preserving all functions.",
+  "verification": {
+   "vitest": "82 passed",
+   "e2e": "10 passed with unchanged assertions",
+   "visualWidths": [
+    1440,
+    1280,
+    960,
+    390,
+    320
+   ],
+   "stateScreenshots": 33,
+   "floor": 0,
+   "reflex": 0,
+   "finishReview": "subagent; 2 findings resolved",
+   "warnings": "3 nowrap warnings dismissed after viewport checks; F4 answered"
+  },
+  "maintenanceFixes": [
+   "Revalidate displayed deposit errors when balance or selected plan changes",
+   "Include the latest block when fetching renewal lineage despite cached block-number lag"
+  ]
+ }
+]

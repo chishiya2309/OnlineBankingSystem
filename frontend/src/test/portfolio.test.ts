@@ -289,6 +289,31 @@ describe("Portfolio Discovery & Accounting Tests (PF-001 to PF-008)", () => {
     expect(activeDep?.renewalType).toBe("manual");
   });
 
+  it("PF-007: includes renewal lineage when the cached block number lags the latest block", async () => {
+    window.localStorage.clear();
+    const provider = {
+      getBlock: vi.fn().mockResolvedValue({ timestamp: 1700000000, number: 105 }),
+      getBlockNumber: vi.fn().mockResolvedValue(104),
+      getNetwork: vi.fn().mockResolvedValue({ chainId: 31337n }),
+    } as any;
+    const core = {
+      depositCount: vi.fn().mockResolvedValue(2n),
+      gracePeriodSeconds: vi.fn().mockResolvedValue(172800n),
+      filters: { Renewed: vi.fn().mockReturnValue({}) },
+      queryFilter: vi.fn().mockImplementation((_filter, _from, to) => Promise.resolve(to >= 105 ? [{ args: { oldDepositId: 1n, newDepositId: 2n }, blockNumber: 105 }] : [])),
+      ownerOf: vi.fn().mockResolvedValue(aliceAddress),
+      getDeposit: vi.fn().mockImplementation((id: number) => Promise.resolve({
+        planId: 1n, principal: 1000000000n, startAt: 1690000000n, maturityAt: 1705000000n,
+        aprBpsAtOpen: 200, penaltyBpsAtOpen: 350,
+        status: BigInt(id === 1 ? DepositStatus.ManualRenewed : DepositStatus.Active),
+      })),
+    } as any;
+    const result = await fetchUserPortfolio(core, aliceAddress, provider);
+    expect(result.activeDeposits[0].renewedFromDepositId).toBe(1);
+    expect(result.historicalDeposits[0].renewedToDepositId).toBe(2);
+    window.localStorage.clear();
+  });
+
   it("PF-008: handles RPC partial query errors gracefully without dropping existing records", async () => {
     const mockSavingCore = {
       depositCount: vi.fn().mockResolvedValue(2n),

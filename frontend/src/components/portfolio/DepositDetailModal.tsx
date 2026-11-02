@@ -1,4 +1,5 @@
 import React from "react";
+import { Icon } from "../layout/Icon";
 import { DepositStatus, type DepositRecord } from "../../types";
 import { formatBps, formatTimestamp, shortenAddress } from "../../lib/format";
 
@@ -124,7 +125,7 @@ export const DepositDetailModal: React.FC<DepositDetailModalProps> = ({
           <div className="detail-section glass-panel lineage-flow-section" style={{ padding: "20px", marginBottom: "20px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
               <h4 style={{ fontSize: "14px", fontWeight: 600, color: "var(--color-ink)", margin: 0 }}>
-                🧬 Certificate Renewal Lineage &amp; Flow
+                <Icon name="link" size={16} /> Certificate Renewal Lineage &amp; Flow
               </h4>
               <span className={`lineage-flow-badge ${deposit.renewalType === "auto" ? "badge-auto" : "badge-renewed"}`}>
                 {deposit.renewalType === "auto" ? "Automated Rollover" : "Manual Compound Rollover"}
@@ -151,7 +152,7 @@ export const DepositDetailModal: React.FC<DepositDetailModalProps> = ({
                         className="btn btn-ghost btn-xs text-nowrap lineage-node-btn"
                         onClick={() => onSelectDeposit(deposit.renewedFromDepositId!)}
                       >
-                        View #{deposit.renewedFromDepositId} ↗
+                        View #{deposit.renewedFromDepositId}
                       </button>
                     )}
                   </div>
@@ -160,7 +161,7 @@ export const DepositDetailModal: React.FC<DepositDetailModalProps> = ({
                     <span className="lineage-arrow-label">
                       {deposit.renewalType === "auto" ? "Auto-Renewed" : "Compounded & Rolled"}
                     </span>
-                    <span className="lineage-arrow-symbol">➔</span>
+                    <Icon name="arrow" size={18} className="lineage-arrow-symbol" />
                   </div>
                 </>
               )}
@@ -187,7 +188,7 @@ export const DepositDetailModal: React.FC<DepositDetailModalProps> = ({
                 <>
                   <div className="lineage-flow-arrow">
                     <span className="lineage-arrow-label">Rolled Over Into</span>
-                    <span className="lineage-arrow-symbol">➔</span>
+                    <Icon name="arrow" size={18} className="lineage-arrow-symbol" />
                   </div>
 
                   <div className="lineage-flow-node lineage-node-successor">
@@ -205,7 +206,7 @@ export const DepositDetailModal: React.FC<DepositDetailModalProps> = ({
                         className="btn btn-ghost btn-xs text-nowrap lineage-node-btn"
                         onClick={() => onSelectDeposit(deposit.renewedToDepositId!)}
                       >
-                        View #{deposit.renewedToDepositId} ↗
+                        View #{deposit.renewedToDepositId}
                       </button>
                     )}
                   </div>
@@ -389,8 +390,8 @@ export const DepositDetailModal: React.FC<DepositDetailModalProps> = ({
         </div>
 
         {isActive && !deposit.isMatured && (
-          <div style={{ marginTop: "14px", padding: "10px 14px", background: "rgba(100, 150, 255, 0.08)", borderRadius: "8px", fontSize: "12px", color: "var(--color-muted)", border: "1px dashed var(--color-border)" }}>
-            💡 <strong>Sepolia Testing Tip:</strong> Bank Administrators can fast-forward this deposit to maturity immediately in the <strong>Admin Portal</strong> tab.
+          <div style={{ marginTop: "14px", padding: "10px 14px", background: "var(--color-accent-soft)", borderRadius: "8px", fontSize: "12px", color: "var(--color-muted)", border: "1px dashed var(--color-border)" }}>
+            <strong>Testing Tip:</strong> Bank administrators can create a short-duration plan in the <strong>Admin Portal</strong>. The term of an open deposit stays fixed.
           </div>
         )}
       </div>

@@ -158,9 +158,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       )}
 
       {/* Main Admin Grid */}
-      <div className="admin-grid" style={{ display: "grid", gap: "24px" }}>
+      <div className="admin-grid">
         {/* Row 1: System Controls & Vault Liquidity */}
-        <div className="admin-two-col" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "24px" }}>
+        <div className="admin-two-col">
           <AdminSystemCard
             summary={summary}
             status={admin.status}

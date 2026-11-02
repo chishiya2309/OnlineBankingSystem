@@ -1,6 +1,7 @@
 import React from "react";
 import type { SavingPlan } from "../../types";
 import { PlanCard } from "./PlanCard";
+import { Icon } from "../layout/Icon";
 
 interface PlanListProps {
   plans: SavingPlan[];
@@ -20,7 +21,7 @@ export const PlanList: React.FC<PlanListProps> = ({
   onRefresh,
 }) => {
   return (
-    <section style={{ marginBottom: "48px" }}>
+    <section className="plans-section">
       <div className="section-header">
         <div>
           <h2 className="section-title">Verified Saving Plans</h2>
@@ -34,7 +35,8 @@ export const PlanList: React.FC<PlanListProps> = ({
           onClick={onRefresh}
           disabled={isLoading}
         >
-          {isLoading ? "Refreshing…" : "↻ Refresh Plans"}
+          <Icon name="refresh" size={16} />
+          {isLoading ? "Refreshing…" : "Refresh Plans"}
         </button>
       </div>
 
@@ -45,8 +47,11 @@ export const PlanList: React.FC<PlanListProps> = ({
       )}
 
       {isLoading && plans.length === 0 ? (
-        <div className="glass-panel" style={{ padding: "40px", textAlign: "center", color: "var(--color-muted)" }}>
-          Loading saving plans from blockchain ledger…
+        <div className="plans-loading" role="status" aria-busy="true">
+          <span>Loading saving plans from blockchain ledger…</span>
+          <div className="plan-skeleton" aria-hidden="true" />
+          <div className="plan-skeleton" aria-hidden="true" />
+          <div className="plan-skeleton" aria-hidden="true" />
         </div>
       ) : plans.length === 0 ? (
         <div className="glass-panel" style={{ padding: "40px", textAlign: "center", color: "var(--color-muted)" }}>

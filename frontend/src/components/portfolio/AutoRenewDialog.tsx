@@ -1,4 +1,5 @@
 import React from "react";
+import { Icon } from "../layout/Icon";
 import type { DepositRecord } from "../../types";
 import type { UseRenewalState } from "../../hooks/useRenewal";
 import { formatDurationSeconds, formatBps, formatTimestamp, formatUSDC, shortenAddress } from "../../lib/format";
@@ -63,7 +64,7 @@ export const AutoRenewDialog: React.FC<AutoRenewDialogProps> = ({
                   fontSize: "20px",
                 }}
               >
-                ✓
+                <Icon name="check" size={22} />
               </div>
               <h3 style={{ fontSize: "20px", fontWeight: 600, color: "var(--color-ink)", margin: 0 }}>
                 Auto Renewal Executed!
@@ -200,7 +201,7 @@ export const AutoRenewDialog: React.FC<AutoRenewDialogProps> = ({
             )}
 
             {/* Actions */}
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px" }}>
+            <div className="dialog-actions">
               <button
                 type="button"
                 className="btn btn-secondary text-nowrap"

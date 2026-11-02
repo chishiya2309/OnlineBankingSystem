@@ -129,7 +129,8 @@ export async function fetchUserPortfolio(
 
     if (provider && typeof provider.getBlockNumber === "function") {
       try {
-        toBlock = await provider.getBlockNumber();
+        // The provider's block-number cache can lag a transaction that just settled.
+        toBlock = Math.max(latestBlock?.number ?? 0, await provider.getBlockNumber());
       } catch {
         toBlock = "latest";
       }

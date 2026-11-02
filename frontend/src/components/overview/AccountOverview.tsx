@@ -1,5 +1,6 @@
 import React from "react";
 import { formatUSDC } from "../../lib/format";
+import { Icon } from "../layout/Icon";
 
 interface AccountOverviewProps {
   isConnected: boolean;
@@ -42,7 +43,7 @@ export const AccountOverview: React.FC<AccountOverviewProps> = ({
   };
 
   return (
-    <div>
+    <section className="account-overview" aria-label="Account overview">
       {isStaleDeployment && (
         <div className="alert-banner error" role="alert">
           <div>
@@ -51,8 +52,8 @@ export const AccountOverview: React.FC<AccountOverviewProps> = ({
         </div>
       )}
 
-      <div className="overview-grid">
-        <div className="overview-card">
+      <div className="overview-grid account-grid">
+        <div className="overview-card balance-overview">
           <div className="overview-label">Available MockUSDC Balance</div>
           <div className="overview-value tabular-num">
             {isConnected ? formatUSDC(balance, "auto") : "0.00"} <span style={{ fontSize: "16px", color: "var(--color-muted)" }}>USDC</span>
@@ -66,9 +67,9 @@ export const AccountOverview: React.FC<AccountOverviewProps> = ({
                   className="btn btn-ghost btn-sm text-nowrap"
                   onClick={handleWatchToken}
                   title="Import MockUSDC token into your MetaMask wallet"
-                  style={{ padding: "2px 6px", fontSize: "11px", height: "auto" }}
+                  style={{ padding: "4px 8px", fontSize: "13px", height: "auto" }}
                 >
-                  🦊 Add to MetaMask
+                  <Icon name="wallet" size={16} /> Add to MetaMask
                 </button>
               )}
             </div>
@@ -106,6 +107,6 @@ export const AccountOverview: React.FC<AccountOverviewProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };

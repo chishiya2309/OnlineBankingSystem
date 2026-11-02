@@ -17,7 +17,6 @@ export const PlanCard: React.FC<PlanCardProps> = ({
     <div
       className={`plan-card ${isSelected ? "selected" : ""} ${!plan.enabled ? "disabled" : ""}`}
     >
-      <div>
         <div className="plan-head">
           <div>
             <h3 className="plan-title">Plan #{plan.planId}</h3>
@@ -53,14 +52,11 @@ export const PlanCard: React.FC<PlanCardProps> = ({
             <span className="meta-value tabular-num">{plan.maxDepositFormatted}</span>
           </div>
         </div>
-      </div>
-
       <button
         type="button"
-        className={`btn ${isSelected ? "btn-primary" : "btn-secondary"}`}
+        className={`btn btn-secondary plan-select${isSelected ? " is-selected" : ""}`}
         onClick={() => onSelect(plan)}
         disabled={!plan.enabled}
-        style={{ width: "100%" }}
       >
         {!plan.enabled ? "Plan Disabled" : isSelected ? "Plan Selected" : "Select Plan"}
       </button>

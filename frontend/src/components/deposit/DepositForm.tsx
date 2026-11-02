@@ -27,7 +27,20 @@ export const DepositForm: React.FC<DepositFormProps> = ({
   onOpenDeposit,
 }) => {
   const [amountStr, setAmountStr] = useState<string>("500.00");
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [hasEditedAmount, setHasEditedAmount] = useState(false);
+
+  const validationError = useMemo(() => {
+    if (!hasEditedAmount) return null;
+    try {
+      const parsed = parseUSDC(amountStr);
+      if (parsed > balance) return `Amount exceeds available balance (${formatUSDC(balance, "auto")} USDC).`;
+      if (selectedPlan?.minDeposit && parsed < selectedPlan.minDeposit) return `Minimum deposit for this plan is ${selectedPlan.minDepositFormatted}.`;
+      if (selectedPlan?.maxDeposit && parsed > selectedPlan.maxDeposit) return `Maximum deposit for this plan is ${selectedPlan.maxDepositFormatted}.`;
+      return null;
+    } catch (err: any) {
+      return err.message || "Invalid amount format";
+    }
+  }, [amountStr, balance, selectedPlan, hasEditedAmount]);
 
   const parsedAmount = useMemo(() => {
     try {
@@ -55,30 +68,14 @@ export const DepositForm: React.FC<DepositFormProps> = ({
   }, [allowance, parsedAmount]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setAmountStr(val);
-    setValidationError(null);
-
-    try {
-      const parsed = parseUSDC(val);
-      if (parsed > balance) {
-        setValidationError(`Amount exceeds available balance (${formatUSDC(balance, "auto")} USDC).`);
-      } else if (selectedPlan) {
-        if (selectedPlan.minDeposit > 0n && parsed < selectedPlan.minDeposit) {
-          setValidationError(`Minimum deposit for this plan is ${selectedPlan.minDepositFormatted}.`);
-        } else if (selectedPlan.maxDeposit > 0n && parsed > selectedPlan.maxDeposit) {
-          setValidationError(`Maximum deposit for this plan is ${selectedPlan.maxDepositFormatted}.`);
-        }
-      }
-    } catch (err: any) {
-      setValidationError(err.message || "Invalid amount format");
-    }
+    setAmountStr(e.target.value);
+    setHasEditedAmount(true);
   };
 
   const handleSetMax = () => {
     if (balance > 0n) {
       setAmountStr(ethersFormatUSDC(balance));
-      setValidationError(null);
+      setHasEditedAmount(true);
     }
   };
 
@@ -99,7 +96,7 @@ export const DepositForm: React.FC<DepositFormProps> = ({
   const handleAction = async () => {
     if (!selectedPlan) return;
     if (parsedAmount <= 0n) {
-      setValidationError("Please enter a valid deposit amount.");
+      setHasEditedAmount(true);
       return;
     }
 
@@ -121,15 +118,7 @@ export const DepositForm: React.FC<DepositFormProps> = ({
 
       {selectedPlan ? (
         <div>
-          <div
-            style={{
-              padding: "16px",
-              background: "var(--color-paper-2)",
-              borderRadius: "var(--radius-inner)",
-              border: "var(--rule-hair) solid var(--color-rule)",
-              marginBottom: "24px",
-            }}
-          >
+          <div className="selected-plan-summary">
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
               <strong>Selected: Plan #{selectedPlan.planId}</strong>
               <span className="tabular-num" style={{ color: "var(--color-accent)", fontWeight: "600" }}>
@@ -143,7 +132,7 @@ export const DepositForm: React.FC<DepositFormProps> = ({
 
           <div className="form-group">
             <div className="form-label">
-              <span>Deposit Principal</span>
+              <label htmlFor="deposit-principal">Deposit Principal</label>
               <span className="tabular-num">
                 Balance: {formatUSDC(balance, "auto")} USDC
               </span>
@@ -151,7 +140,11 @@ export const DepositForm: React.FC<DepositFormProps> = ({
 
             <div className="input-wrapper">
               <input
+                id="deposit-principal"
                 type="text"
+                inputMode="decimal"
+                aria-invalid={Boolean(validationError)}
+                aria-describedby={validationError ? "deposit-amount-error" : undefined}
                 className="form-input tabular-num"
                 value={amountStr}
                 onChange={handleAmountChange}
@@ -165,14 +158,14 @@ export const DepositForm: React.FC<DepositFormProps> = ({
                   onClick={handleSetMax}
                   disabled={isPending || !isConnected || balance === 0n}
                 >
-                  MAX
+                  Max
                 </button>
                 <span className="input-asset">USDC</span>
               </div>
             </div>
 
             {validationError && (
-              <div style={{ color: "var(--color-dusk)", fontSize: "12px", marginTop: "6px" }}>
+              <div id="deposit-amount-error" role="alert" style={{ color: "var(--color-dusk)", fontSize: "12px", marginTop: "6px" }}>
                 {validationError}
               </div>
             )}

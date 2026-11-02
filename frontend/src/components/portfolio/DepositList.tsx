@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { Icon } from "../layout/Icon";
 import type { DepositRecord } from "../../types";
 import { DepositCard } from "./DepositCard";
 
@@ -110,7 +111,7 @@ export const DepositList: React.FC<DepositListProps> = ({
                 onClick={() => setFilterMode(filterMode === "renewed" ? "all" : "renewed")}
                 title="Filter to certificates with renewal lineage"
               >
-                🧬 Renewed Only ({renewedCount})
+                <Icon name="refresh" size={16} /> Renewed Only ({renewedCount})
               </button>
             )}
 
@@ -129,7 +130,7 @@ export const DepositList: React.FC<DepositListProps> = ({
                   onClick={() => setSearchQuery("")}
                   title="Clear search"
                 >
-                  ✕
+                  <Icon name="close" size={16} />
                 </button>
               )}
             </div>
