@@ -98,6 +98,14 @@ export const App: React.FC = () => {
     return success;
   };
 
+  const handleSelectDepositById = (depositId: number) => {
+    const all = [...portfolio.activeDeposits, ...portfolio.historicalDeposits];
+    const target = all.find((d) => d.depositId === depositId);
+    if (target) {
+      setDetailDeposit(target);
+    }
+  };
+
   return (
     <div className="app-root">
       <Header wallet={wallet} isBankAdmin={admin.summary.isBankAdmin} />
@@ -282,6 +290,7 @@ export const App: React.FC = () => {
                       onManualRenew={(d) => setManualRenewDeposit(d)}
                       onAutoRenew={(d) => setAutoRenewDeposit(d)}
                       onNavigateToPlans={() => setActiveTab("plans")}
+                      onSelectDeposit={handleSelectDepositById}
                     />
                   </div>
                 </>
@@ -315,6 +324,7 @@ export const App: React.FC = () => {
           onWithdraw={(d) => setWithdrawDeposit(d)}
           onManualRenew={(d) => setManualRenewDeposit(d)}
           onAutoRenew={(d) => setAutoRenewDeposit(d)}
+          onSelectDeposit={handleSelectDepositById}
         />
       )}
 

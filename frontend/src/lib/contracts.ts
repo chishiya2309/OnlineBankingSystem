@@ -13,10 +13,19 @@ export const VAULT_MANAGER_ABI = VaultManagerExport.abi;
 interface NetworkEntry {
   name: string;
   chainId: number;
+  deployedBlock?: number;
   contracts: ContractAddresses;
 }
 
 const networksMap = networksData as Record<string, NetworkEntry>;
+
+/**
+ * Returns the block number at which contracts were deployed on the given chainId.
+ */
+export function getDeployedBlock(chainId: number): number {
+  const entry = networksMap[chainId.toString()];
+  return entry?.deployedBlock ?? 0;
+}
 
 /**
  * Returns contract addresses registered for the given chainId.

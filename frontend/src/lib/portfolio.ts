@@ -11,6 +11,7 @@ import {
   calculateMaturityPayout,
 } from "./financials";
 import { formatUSDC } from "./format";
+import { getDeployedBlock } from "./contracts";
 
 export interface PortfolioFetchResult {
   activeDeposits: DepositRecord[];
@@ -20,6 +21,31 @@ export interface PortfolioFetchResult {
 }
 
 const BATCH_SIZE = 10;
+
+interface CachedRenewedEvent {
+  oldId: number;
+  newId: number;
+  blockNumber: number;
+}
+
+function getStoredRenewedEvents(chainId: number): CachedRenewedEvent[] {
+  try {
+    const raw = typeof window !== "undefined" ? window.localStorage.getItem(`sdc_renewed_${chainId}`) : null;
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveStoredRenewedEvents(chainId: number, events: CachedRenewedEvent[]) {
+  try {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(`sdc_renewed_${chainId}`, JSON.stringify(events));
+    }
+  } catch {
+    // Ignore quota or private-mode storage errors
+  }
+}
 
 /**
  * Discovers and parses all deposits currently owned by the target account.
@@ -74,18 +100,90 @@ export async function fetchUserPortfolio(
   const renewedToMap = new Map<number, number>();
   const renewedFromMap = new Map<number, number>();
   try {
+    let chainId = 31337;
+    let fromBlock = 0;
+    let toBlock: number | "latest" = "latest";
+
+    if (provider && typeof provider.getNetwork === "function") {
+      try {
+        const net = await provider.getNetwork();
+        chainId = Number(net.chainId);
+      } catch {
+        // Fallback to default
+      }
+    }
+
+    const deployedBlock = getDeployedBlock(chainId);
+    const cachedEvents = getStoredRenewedEvents(chainId);
+
+    for (const ev of cachedEvents) {
+      renewedToMap.set(ev.oldId, ev.newId);
+      renewedFromMap.set(ev.newId, ev.oldId);
+    }
+
+    const maxCachedBlock = cachedEvents.reduce(
+      (max, ev) => Math.max(max, ev.blockNumber || 0),
+      deployedBlock
+    );
+    fromBlock = maxCachedBlock > deployedBlock ? maxCachedBlock + 1 : deployedBlock;
+
+    if (provider && typeof provider.getBlockNumber === "function") {
+      try {
+        toBlock = await provider.getBlockNumber();
+      } catch {
+        toBlock = "latest";
+      }
+    }
+
     const renewedFilter = savingCore.filters.Renewed();
-    const renewedEvents = await savingCore.queryFilter(renewedFilter, 0, "latest");
-    for (const ev of renewedEvents) {
-      if ("args" in ev && ev.args) {
-        const oldId = Number(ev.args[0] ?? ev.args.oldDepositId);
-        const newId = Number(ev.args[1] ?? ev.args.newDepositId);
-        if (oldId && newId) {
-          renewedToMap.set(oldId, newId);
-          renewedFromMap.set(newId, oldId);
+    let newEvents: any[] = [];
+
+    if (typeof toBlock === "number" && toBlock >= fromBlock) {
+      const CHUNK_SIZE = 5000;
+      const chunks: { from: number; to: number }[] = [];
+      for (let b = fromBlock; b <= toBlock; b += CHUNK_SIZE) {
+        chunks.push({ from: b, to: Math.min(b + CHUNK_SIZE - 1, toBlock) });
+      }
+
+      const chunkResults = await Promise.all(
+        chunks.map(async ({ from, to }) => {
+          try {
+            return await savingCore.queryFilter(renewedFilter, from, to);
+          } catch (chunkErr) {
+            console.warn(`Querying chunk [${from}, ${to}] failed:`, chunkErr);
+            return [];
+          }
+        })
+      );
+      newEvents = chunkResults.flat();
+    } else if (fromBlock <= (typeof toBlock === "number" ? toBlock : Number.MAX_SAFE_INTEGER)) {
+      try {
+        newEvents = (await savingCore.queryFilter(renewedFilter, fromBlock, toBlock)) as any[];
+      } catch {
+        try {
+          newEvents = (await savingCore.queryFilter(renewedFilter)) as any[];
+        } catch {
+          newEvents = [];
         }
       }
     }
+
+    const updatedCachedEvents = [...cachedEvents];
+    for (const ev of newEvents) {
+      if ("args" in ev && ev.args) {
+        const oldId = Number(ev.args[0] ?? ev.args.oldDepositId);
+        const newId = Number(ev.args[1] ?? ev.args.newDepositId);
+        const blockNumber = ev.blockNumber ?? fromBlock;
+        if (oldId && newId) {
+          renewedToMap.set(oldId, newId);
+          renewedFromMap.set(newId, oldId);
+          if (!updatedCachedEvents.some((c) => c.oldId === oldId && c.newId === newId)) {
+            updatedCachedEvents.push({ oldId, newId, blockNumber });
+          }
+        }
+      }
+    }
+    saveStoredRenewedEvents(chainId, updatedCachedEvents);
   } catch (err) {
     console.warn("Could not query Renewed events for lineage mapping:", err);
   }
@@ -193,7 +291,7 @@ export async function fetchUserPortfolio(
     })
   );
 
-  // 4b. Resolve renewalType ("manual" | "auto") for successor deposits by inspecting predecessor status
+  // 4b. Resolve renewalType ("manual" | "auto") and predecessor/successor summaries
   const depositMap = new Map<number, DepositRecord>();
   for (const d of deposits) {
     depositMap.set(d.depositId, d);
@@ -201,21 +299,79 @@ export async function fetchUserPortfolio(
 
   await Promise.all(
     deposits.map(async (d) => {
+      // 1. Predecessor resolution
       if (d.renewedFromDepositId) {
         const predecessor = depositMap.get(d.renewedFromDepositId);
-        let oldStatus: DepositStatus | null = predecessor ? predecessor.status : null;
-        if (oldStatus === null && savingCore) {
+        if (predecessor) {
+          d.predecessorSummary = {
+            depositId: predecessor.depositId,
+            planId: predecessor.planId,
+            principalFormatted: predecessor.principalFormatted,
+            accruedInterestFormatted: predecessor.accruedInterestFormatted,
+            status: predecessor.status,
+          };
+          if (predecessor.status === DepositStatus.ManualRenewed) {
+            d.renewalType = "manual";
+          } else if (predecessor.status === DepositStatus.AutoRenewed) {
+            d.renewalType = "auto";
+          }
+        } else if (savingCore) {
           try {
             const oldRaw = await savingCore.getDeposit(d.renewedFromDepositId);
-            oldStatus = Number(oldRaw.status) as DepositStatus;
+            const oldPlanId = Number(oldRaw.planId);
+            const oldPrincipal = BigInt(oldRaw.principal);
+            const oldApr = Number(oldRaw.aprBpsAtOpen);
+            const oldStatus = Number(oldRaw.status) as DepositStatus;
+
+            let oldTenor = 0;
+            try {
+              oldTenor = Number(await savingCore.planDurationSeconds(oldPlanId));
+            } catch {
+              oldTenor = 0;
+            }
+            const oldInterest = calculateInterestFromSeconds(oldPrincipal, oldApr, oldTenor);
+
+            d.predecessorSummary = {
+              depositId: d.renewedFromDepositId,
+              planId: oldPlanId,
+              principalFormatted: formatUSDC(oldPrincipal, "auto"),
+              accruedInterestFormatted: formatUSDC(oldInterest, "auto"),
+              status: oldStatus,
+            };
+
+            if (oldStatus === DepositStatus.ManualRenewed) {
+              d.renewalType = "manual";
+            } else if (oldStatus === DepositStatus.AutoRenewed) {
+              d.renewalType = "auto";
+            }
           } catch {
-            oldStatus = null;
+            // Predecessor fetch ignored
           }
         }
-        if (oldStatus === DepositStatus.ManualRenewed) {
-          d.renewalType = "manual";
-        } else if (oldStatus === DepositStatus.AutoRenewed) {
-          d.renewalType = "auto";
+      }
+
+      // 2. Successor resolution
+      if (d.renewedToDepositId) {
+        const successor = depositMap.get(d.renewedToDepositId);
+        if (successor) {
+          d.successorSummary = {
+            depositId: successor.depositId,
+            planId: successor.planId,
+            principalFormatted: successor.principalFormatted,
+            status: successor.status,
+          };
+        } else if (savingCore) {
+          try {
+            const newRaw = await savingCore.getDeposit(d.renewedToDepositId);
+            d.successorSummary = {
+              depositId: d.renewedToDepositId,
+              planId: Number(newRaw.planId),
+              principalFormatted: formatUSDC(BigInt(newRaw.principal), "auto"),
+              status: Number(newRaw.status) as DepositStatus,
+            };
+          } catch {
+            // Successor fetch ignored
+          }
         }
       }
     })

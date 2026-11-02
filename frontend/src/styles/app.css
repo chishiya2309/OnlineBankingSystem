@@ -788,6 +788,306 @@
   font-weight: 500;
 }
 
+/* Clickable Lineage Pill Button */
+.lineage-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-family: var(--font-body);
+  background: var(--color-paper-2);
+  border: var(--rule-hair) solid var(--color-rule);
+  color: var(--color-ink-2);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1.2;
+}
+
+.lineage-pill-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: rgba(60, 180, 120, 0.1);
+  transform: translateY(-1px);
+}
+
+.lineage-pill-btn.lineage-manual {
+  border-color: rgba(60, 180, 120, 0.4);
+  color: var(--color-accent);
+  background: rgba(60, 180, 120, 0.08);
+  font-weight: 500;
+}
+
+.lineage-pill-btn.lineage-manual:hover {
+  border-color: var(--color-accent);
+  background: rgba(60, 180, 120, 0.16);
+  box-shadow: 0 2px 8px rgba(60, 180, 120, 0.15);
+}
+
+.lineage-pill-btn.lineage-auto {
+  border-color: rgba(220, 130, 40, 0.4);
+  color: var(--color-accent-2);
+  background: rgba(220, 130, 40, 0.08);
+  font-weight: 500;
+}
+
+.lineage-pill-btn.lineage-auto:hover {
+  border-color: var(--color-accent-2);
+  background: rgba(220, 130, 40, 0.16);
+  box-shadow: 0 2px 8px rgba(220, 130, 40, 0.15);
+}
+
+.lineage-pill-btn.lineage-successor {
+  border-color: rgba(100, 150, 255, 0.4);
+  color: #70a0ff;
+  background: rgba(100, 150, 255, 0.08);
+  font-weight: 500;
+}
+
+.lineage-pill-btn.lineage-successor:hover {
+  border-color: #70a0ff;
+  background: rgba(100, 150, 255, 0.16);
+  box-shadow: 0 2px 8px rgba(100, 150, 255, 0.15);
+}
+
+.lineage-arrow-icon {
+  font-size: 10px;
+  opacity: 0.8;
+  transition: transform 0.15s ease;
+}
+
+.lineage-pill-btn:hover .lineage-arrow-icon {
+  transform: translate(1px, -1px);
+  opacity: 1;
+}
+
+/* Lineage Context Banner on Deposit Card */
+.lineage-context-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--color-paper-2);
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-inner);
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.lineage-context-banner:hover {
+  border-color: var(--color-border);
+  background: var(--color-paper-3);
+}
+
+.lineage-context-icon {
+  font-size: 14px;
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.lineage-context-text {
+  flex-grow: 1;
+  color: var(--color-ink-2);
+}
+
+.lineage-context-action {
+  font-size: 11px;
+  color: var(--color-accent);
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+.lineage-context-banner:hover .lineage-context-action {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* Modal Lineage Flow */
+.lineage-flow-section {
+  background: var(--color-paper-2);
+  border-color: var(--color-rule);
+}
+
+.lineage-flow-badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.lineage-flow-pipeline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 16px 0;
+  flex-wrap: wrap;
+}
+
+.lineage-flow-node {
+  background: var(--color-paper-3);
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-inner);
+  padding: 12px 16px;
+  min-width: 150px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lineage-node-predecessor {
+  border-color: rgba(60, 180, 120, 0.3);
+}
+
+.lineage-node-current {
+  border-color: var(--color-accent);
+  background: rgba(60, 180, 120, 0.06);
+  box-shadow: 0 0 12px rgba(60, 180, 120, 0.1);
+}
+
+.lineage-node-successor {
+  border-color: rgba(100, 150, 255, 0.3);
+}
+
+.lineage-node-tag {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-muted);
+}
+
+.lineage-node-tag.tag-current {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.lineage-node-id {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.lineage-node-plan {
+  font-size: 11px;
+  color: var(--color-muted);
+}
+
+.lineage-node-amt {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.lineage-node-status {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-accent);
+}
+
+.lineage-node-btn {
+  margin-top: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  align-self: center;
+}
+
+.lineage-flow-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.lineage-arrow-label {
+  font-size: 10px;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.lineage-arrow-symbol {
+  font-size: 18px;
+  color: var(--color-accent);
+}
+
+.lineage-narrative-box {
+  background: var(--color-paper-3);
+  border-radius: var(--radius-inner);
+  padding: 12px 14px;
+  border: var(--rule-hair) solid var(--color-rule);
+  margin-top: 12px;
+}
+
+/* Filter and Search Bar in DepositList */
+.filter-pill-btn {
+  background: var(--color-paper-2);
+  border: var(--rule-hair) solid var(--color-rule);
+  color: var(--color-muted);
+  border-radius: var(--radius-pill);
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.filter-pill-btn:hover {
+  color: var(--color-ink);
+  border-color: var(--color-border);
+}
+
+.filter-pill-btn.active {
+  background: rgba(60, 180, 120, 0.12);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.deposit-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.deposit-search-input {
+  background: var(--color-paper-2);
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  padding: 5px 28px 5px 12px;
+  font-size: 12px;
+  color: var(--color-ink);
+  width: 170px;
+  transition: all 0.15s ease;
+}
+
+.deposit-search-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  width: 200px;
+  background: var(--color-paper-3);
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--color-muted);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.search-clear-btn:hover {
+  color: var(--color-ink);
+}
+
 .deposit-principal-row {
   display: flex;
   justify-content: space-between;

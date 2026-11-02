@@ -8,6 +8,7 @@ interface DepositCardProps {
   onWithdraw: (deposit: DepositRecord) => void;
   onManualRenew: (deposit: DepositRecord) => void;
   onAutoRenew: (deposit: DepositRecord) => void;
+  onSelectDeposit?: (depositId: number) => void;
 }
 
 export const DepositCard: React.FC<DepositCardProps> = ({
@@ -16,6 +17,7 @@ export const DepositCard: React.FC<DepositCardProps> = ({
   onWithdraw,
   onManualRenew,
   onAutoRenew,
+  onSelectDeposit,
 }) => {
   const getStatusBadge = () => {
     switch (deposit.status) {
@@ -62,38 +64,90 @@ export const DepositCard: React.FC<DepositCardProps> = ({
         </div>
 
         {deposit.renewedFromDepositId && (
-          <span
-            className={`lineage-badge text-nowrap ${
+          <button
+            type="button"
+            className={`lineage-pill-btn text-nowrap ${
               deposit.renewalType === "auto"
                 ? "lineage-auto"
                 : deposit.renewalType === "manual"
                 ? "lineage-manual"
                 : ""
             }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onSelectDeposit && deposit.renewedFromDepositId) {
+                onSelectDeposit(deposit.renewedFromDepositId);
+              }
+            }}
             title={
               deposit.renewalType === "auto"
-                ? `Auto-Renewed from #${deposit.renewedFromDepositId} after grace period (Original APR & tenor locked)`
+                ? `Auto-Renewed from #${deposit.renewedFromDepositId}. Click to view predecessor Certificate #${deposit.renewedFromDepositId}`
                 : deposit.renewalType === "manual"
-                ? `Manually Renewed from #${deposit.renewedFromDepositId} (Compounded principal in chosen Plan #${deposit.planId})`
-                : `Lineage: Renewed from #${deposit.renewedFromDepositId}`
+                ? `Manually Renewed from #${deposit.renewedFromDepositId}. Click to view predecessor Certificate #${deposit.renewedFromDepositId}`
+                : `Lineage: Renewed from #${deposit.renewedFromDepositId}. Click to view Certificate #${deposit.renewedFromDepositId}`
             }
           >
-            {deposit.renewalType === "auto"
-              ? `From #${deposit.renewedFromDepositId} (Auto Renew)`
-              : deposit.renewalType === "manual"
-              ? `From #${deposit.renewedFromDepositId} (Manual Renew)`
-              : `From #${deposit.renewedFromDepositId}`}
-          </span>
+            <span>
+              {deposit.renewalType === "auto"
+                ? `🔄 From #${deposit.renewedFromDepositId} (Auto Renew)`
+                : deposit.renewalType === "manual"
+                ? `🔄 From #${deposit.renewedFromDepositId} (Manual Renew)`
+                : `🔄 From #${deposit.renewedFromDepositId}`}
+            </span>
+            <span className="lineage-arrow-icon">↗</span>
+          </button>
         )}
         {deposit.renewedToDepositId && (
-          <span className="lineage-badge text-nowrap" title={`Lineage: Succeeded by #${deposit.renewedToDepositId}`}>
-            Succeeded by #{deposit.renewedToDepositId}
-          </span>
+          <button
+            type="button"
+            className="lineage-pill-btn lineage-successor text-nowrap"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onSelectDeposit && deposit.renewedToDepositId) {
+                onSelectDeposit(deposit.renewedToDepositId);
+              }
+            }}
+            title={`Rolled over into Certificate #${deposit.renewedToDepositId}. Click to view successor Certificate #${deposit.renewedToDepositId}`}
+          >
+            <span>↳ Succeeded by #{deposit.renewedToDepositId}</span>
+            <span className="lineage-arrow-icon">↗</span>
+          </button>
         )}
       </div>
 
       {/* Main Figure: Principal & Projected Yield */}
       <div className="deposit-card-body">
+        {/* Lineage Context Banner */}
+        {deposit.predecessorSummary && (
+          <div
+            className="lineage-context-banner"
+            onClick={() => onSelectDeposit && onSelectDeposit(deposit.predecessorSummary!.depositId)}
+            role="button"
+            tabIndex={0}
+            title="Click to view predecessor certificate"
+          >
+            <span className="lineage-context-icon">↳</span>
+            <span className="lineage-context-text">
+              Rolled over from <strong>Certificate #{deposit.predecessorSummary.depositId}</strong> (Plan #{deposit.predecessorSummary.planId} • {deposit.predecessorSummary.principalFormatted} USDC principal + {deposit.predecessorSummary.accruedInterestFormatted} USDC yield)
+            </span>
+            <span className="lineage-context-action">View # {deposit.predecessorSummary.depositId} ↗</span>
+          </div>
+        )}
+        {deposit.successorSummary && (
+          <div
+            className="lineage-context-banner"
+            onClick={() => onSelectDeposit && onSelectDeposit(deposit.successorSummary!.depositId)}
+            role="button"
+            tabIndex={0}
+            title="Click to view successor certificate"
+          >
+            <span className="lineage-context-icon">↳</span>
+            <span className="lineage-context-text">
+              Re-invested as <strong>Certificate #{deposit.successorSummary.depositId}</strong> (Plan #{deposit.successorSummary.planId} • {deposit.successorSummary.principalFormatted} USDC principal)
+            </span>
+            <span className="lineage-context-action">View # {deposit.successorSummary.depositId} ↗</span>
+          </div>
+        )}
         <div className="deposit-principal-row">
           <div>
             <div className="figure-label">Principal Balance</div>

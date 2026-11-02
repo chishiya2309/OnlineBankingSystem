@@ -54,6 +54,19 @@ export interface DepositRecord {
   renewedFromDepositId?: number;
   renewedToDepositId?: number;
   renewalType?: "manual" | "auto";
+  predecessorSummary?: {
+    depositId: number;
+    planId: number;
+    principalFormatted: string;
+    accruedInterestFormatted: string;
+    status: DepositStatus;
+  };
+  successorSummary?: {
+    depositId: number;
+    planId: number;
+    principalFormatted: string;
+    status: DepositStatus;
+  };
 }
 
 export interface PortfolioSummary {

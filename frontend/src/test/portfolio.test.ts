@@ -195,8 +195,12 @@ describe("Portfolio Discovery & Accounting Tests (PF-001 to PF-008)", () => {
     const newDeposit = result.activeDeposits.find((d) => d.depositId === 2);
 
     expect(oldDeposit?.renewedToDepositId).toBe(2);
+    expect(oldDeposit?.successorSummary?.depositId).toBe(2);
+    expect(oldDeposit?.successorSummary?.status).toBe(DepositStatus.Active);
     expect(newDeposit?.renewedFromDepositId).toBe(1);
     expect(newDeposit?.renewalType).toBe("manual");
+    expect(newDeposit?.predecessorSummary?.depositId).toBe(1);
+    expect(newDeposit?.predecessorSummary?.status).toBe(DepositStatus.ManualRenewed);
   });
 
   it("PF-006b: distinguishes auto-renewed successor from manual-renewed successor", async () => {
@@ -235,6 +239,54 @@ describe("Portfolio Discovery & Accounting Tests (PF-001 to PF-008)", () => {
     expect(oldDeposit?.status).toBe(DepositStatus.AutoRenewed);
     expect(newDeposit?.renewedFromDepositId).toBe(1);
     expect(newDeposit?.renewalType).toBe("auto");
+    expect(newDeposit?.predecessorSummary?.depositId).toBe(1);
+    expect(newDeposit?.predecessorSummary?.status).toBe(DepositStatus.AutoRenewed);
+  });
+
+  it("PF-006c: queries logs in bounded chunks when provider supports getNetwork and getBlockNumber", async () => {
+    const chunkProvider = {
+      getBlock: vi.fn().mockResolvedValue({ timestamp: 1700000000, number: 12042730 }),
+      getNetwork: vi.fn().mockResolvedValue({ chainId: 11155111n }),
+      getBlockNumber: vi.fn().mockResolvedValue(12042730),
+    } as any;
+
+    const queryFilterSpy = vi.fn().mockResolvedValue([
+      {
+        args: {
+          oldDepositId: 3n,
+          newDepositId: 4n,
+          newPrincipal: 1009860000n,
+          newPlanId: 2n,
+        },
+        blockNumber: 12035000,
+      },
+    ]);
+
+    const mockSavingCore = {
+      depositCount: vi.fn().mockResolvedValue(4n),
+      gracePeriodSeconds: vi.fn().mockResolvedValue(172800n),
+      filters: { Renewed: vi.fn().mockReturnValue({}) },
+      queryFilter: queryFilterSpy,
+      ownerOf: vi.fn().mockResolvedValue(aliceAddress),
+      getDeposit: vi.fn().mockImplementation((id: number) => {
+        return Promise.resolve({
+          planId: id === 3 ? 1n : 2n,
+          principal: id === 3 ? 1000000000n : 1009860000n,
+          startAt: 1690000000n,
+          maturityAt: 1705000000n,
+          aprBpsAtOpen: 200,
+          penaltyBpsAtOpen: 350,
+          status: BigInt(id === 3 ? DepositStatus.ManualRenewed : DepositStatus.Active),
+        });
+      }),
+    } as any;
+
+    const result = await fetchUserPortfolio(mockSavingCore, aliceAddress, chunkProvider);
+    // Sepolia deployedBlock is 12032730, blockNumber is 12042730 (range 10,000 blocks -> chunked into 3 chunks of 5000)
+    expect(queryFilterSpy).toHaveBeenCalled();
+    const activeDep = result.activeDeposits.find((d) => d.depositId === 4);
+    expect(activeDep?.renewedFromDepositId).toBe(3);
+    expect(activeDep?.renewalType).toBe("manual");
   });
 
   it("PF-008: handles RPC partial query errors gracefully without dropping existing records", async () => {

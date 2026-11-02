@@ -10,6 +10,7 @@ interface DepositDetailModalProps {
   onWithdraw: (deposit: DepositRecord) => void;
   onManualRenew: (deposit: DepositRecord) => void;
   onAutoRenew: (deposit: DepositRecord) => void;
+  onSelectDeposit?: (depositId: number) => void;
 }
 
 export const DepositDetailModal: React.FC<DepositDetailModalProps> = ({
@@ -20,6 +21,7 @@ export const DepositDetailModal: React.FC<DepositDetailModalProps> = ({
   onWithdraw,
   onManualRenew,
   onAutoRenew,
+  onSelectDeposit,
 }) => {
   if (!deposit) return null;
 
@@ -116,6 +118,123 @@ export const DepositDetailModal: React.FC<DepositDetailModalProps> = ({
             </div>
           )}
         </div>
+
+        {/* Dedicated Renewal Lineage & Flow Section */}
+        {(deposit.renewedFromDepositId || deposit.renewedToDepositId) && (
+          <div className="detail-section glass-panel lineage-flow-section" style={{ padding: "20px", marginBottom: "20px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+              <h4 style={{ fontSize: "14px", fontWeight: 600, color: "var(--color-ink)", margin: 0 }}>
+                🧬 Certificate Renewal Lineage &amp; Flow
+              </h4>
+              <span className={`lineage-flow-badge ${deposit.renewalType === "auto" ? "badge-auto" : "badge-renewed"}`}>
+                {deposit.renewalType === "auto" ? "Automated Rollover" : "Manual Compound Rollover"}
+              </span>
+            </div>
+
+            {/* Visual Flow Pipeline */}
+            <div className="lineage-flow-pipeline">
+              {/* Predecessor Node (if any) */}
+              {deposit.renewedFromDepositId && (
+                <>
+                  <div className="lineage-flow-node lineage-node-predecessor">
+                    <div className="lineage-node-tag">Predecessor</div>
+                    <div className="lineage-node-id">Certificate #{deposit.renewedFromDepositId}</div>
+                    <div className="lineage-node-plan">
+                      {deposit.predecessorSummary ? `Plan #${deposit.predecessorSummary.planId}` : "Predecessor Plan"}
+                    </div>
+                    <div className="lineage-node-amt">
+                      {deposit.predecessorSummary ? `${deposit.predecessorSummary.principalFormatted} USDC` : ""}
+                    </div>
+                    {onSelectDeposit && (
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-xs text-nowrap lineage-node-btn"
+                        onClick={() => onSelectDeposit(deposit.renewedFromDepositId!)}
+                      >
+                        View #{deposit.renewedFromDepositId} ↗
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="lineage-flow-arrow">
+                    <span className="lineage-arrow-label">
+                      {deposit.renewalType === "auto" ? "Auto-Renewed" : "Compounded & Rolled"}
+                    </span>
+                    <span className="lineage-arrow-symbol">➔</span>
+                  </div>
+                </>
+              )}
+
+              {/* Current Node */}
+              <div className="lineage-flow-node lineage-node-current">
+                <div className="lineage-node-tag tag-current">Current Certificate</div>
+                <div className="lineage-node-id">Certificate #{deposit.depositId}</div>
+                <div className="lineage-node-plan">Plan #{deposit.planId}</div>
+                <div className="lineage-node-amt">{deposit.principalFormatted} USDC</div>
+                <div className="lineage-node-status">
+                  {deposit.status === DepositStatus.Active
+                    ? "Active"
+                    : deposit.status === DepositStatus.ManualRenewed
+                    ? "Manual Renewed"
+                    : deposit.status === DepositStatus.AutoRenewed
+                    ? "Auto Renewed"
+                    : "Withdrawn"}
+                </div>
+              </div>
+
+              {/* Successor Node (if any) */}
+              {deposit.renewedToDepositId && (
+                <>
+                  <div className="lineage-flow-arrow">
+                    <span className="lineage-arrow-label">Rolled Over Into</span>
+                    <span className="lineage-arrow-symbol">➔</span>
+                  </div>
+
+                  <div className="lineage-flow-node lineage-node-successor">
+                    <div className="lineage-node-tag">Successor</div>
+                    <div className="lineage-node-id">Certificate #{deposit.renewedToDepositId}</div>
+                    <div className="lineage-node-plan">
+                      {deposit.successorSummary ? `Plan #${deposit.successorSummary.planId}` : "Successor Plan"}
+                    </div>
+                    <div className="lineage-node-amt">
+                      {deposit.successorSummary ? `${deposit.successorSummary.principalFormatted} USDC` : ""}
+                    </div>
+                    {onSelectDeposit && (
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-xs text-nowrap lineage-node-btn"
+                        onClick={() => onSelectDeposit(deposit.renewedToDepositId!)}
+                      >
+                        View #{deposit.renewedToDepositId} ↗
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Financial Narrative Box */}
+            <div className="lineage-narrative-box">
+              {deposit.renewedFromDepositId && (
+                <p style={{ margin: "0 0 6px", fontSize: "13px", lineHeight: 1.6, color: "var(--color-ink)" }}>
+                  <strong>Rollover Origin:</strong> This certificate was created by rolling over matured{" "}
+                  <strong>Certificate #{deposit.renewedFromDepositId}</strong>.
+                  {deposit.predecessorSummary && (
+                    <>
+                      {" "}Initial principal of <strong>{deposit.predecessorSummary.principalFormatted} USDC</strong> plus guaranteed interest of <strong>{deposit.predecessorSummary.accruedInterestFormatted} USDC</strong> was automatically re-invested into current <strong>Plan #{deposit.planId}</strong> (starting principal: <strong>{deposit.principalFormatted} USDC</strong>).
+                    </>
+                  )}
+                </p>
+              )}
+              {deposit.renewedToDepositId && (
+                <p style={{ margin: 0, fontSize: "13px", lineHeight: 1.6, color: "var(--color-ink)" }}>
+                  <strong>Rollover Destination:</strong> This certificate completed its term and was rolled over into{" "}
+                  <strong>Certificate #{deposit.renewedToDepositId}</strong>. Capital and accrued yield were compounded directly into the new deposit without fees.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Financial Specifications */}
         <div className="detail-section glass-panel" style={{ padding: "16px", marginBottom: "20px" }}>
