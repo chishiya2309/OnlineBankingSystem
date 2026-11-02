@@ -28,7 +28,7 @@ export const Header: React.FC<HeaderProps> = ({ wallet, isBankAdmin = false, tit
           </button>
           <div className="header-title-group">
             <div className="mobile-brand">
-              <img src="/favicon.svg" alt="LEDGER Logo" width="24" height="24" />
+              <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="LEDGER Logo" width="24" height="24" />
               <span>LEDGER</span>
             </div>
             <h1 className="page-title">{title}</h1>

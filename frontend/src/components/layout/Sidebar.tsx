@@ -20,7 +20,7 @@ const destinations: { id: AppView; label: string; icon: IconName }[] = [
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, activeDepositCount, isBankAdmin, isMenuOpen }) => (
   <aside id="app-navigation" className={`app-sidebar${isMenuOpen ? " is-open" : ""}`}>
     <div className="sidebar-brand wordmark">
-      <img src="/favicon.svg" alt="LEDGER Logo" width="34" height="34" />
+      <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="LEDGER Logo" width="34" height="34" />
       <span className="wordmark-title">LEDGER</span>
     </div>
     <nav aria-label="Main navigation">
